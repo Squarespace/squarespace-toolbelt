@@ -5,30 +5,29 @@ Utilities for building and maintaining Squarespace templates
 
 ## Installation
 
-    npm install --save-dev squarespace-toolbelt
+    npm install --save-dev @squarespace/toolbelt
 
 ## Usage
 
-In your package.json you can use squarespace-toolbelt to automatically run build tasks on squarespace tempalates. Example:
+In your package.json you can use Squarespace Toolbelt to automatically run build tasks on Squarespace tempalates. Example:
 
     {
       "name": "your-squarespace-template",
       "version": "0.0.1",
-      "homepage": "https://your-squarespace-template.squarespace.com",
       "devDependencies": {
-        "@squarespace/squarespace-toolbelt": "^0.1.0",
+        "@squarespace/toolbelt": "^0.1.0",
         "webpack": "^1.12.9"
       },
       "scripts": {
-        "build": "squaresapce assemble && webpack",
-        "watch": "squaresapce assemble -w & webpack --watch",
+        "build": "squarespace assemble && webpack",
+        "watch": "squarespace assemble -w & webpack --watch",
         "start": "squarespace setup && (npm run watch & squarespace runserver)",
         "deploy": "squarspace setup && squarespace deploy"
       }
       ...
     }
 
-Above we include `squarespace-toolbelt` in the devDependencies, and then use `squarespace assemble` in the project's build and watch scripts.
+Above we include `@squarespace/toolbelt` in the devDependencies, and then use `squarespace assemble` in the project's build and watch scripts.
 
 ## Reference
 
