@@ -1,5 +1,5 @@
-Squarespace Dev Utils
----------------------
+Squarespace Toolbelt
+--------------------
 
 Utilities for building and maintaining Squarespace templates
 
