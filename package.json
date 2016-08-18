@@ -1,5 +1,5 @@
 {
-  "name": "@squarespace/squarespace-toolbelt",
+  "name": "@squarespace/toolbelt",
   "version": "0.6.1",
   "author": "Squarespace, Inc.",
   "description": "Utilities for building and maintaining Squarespace templates",
