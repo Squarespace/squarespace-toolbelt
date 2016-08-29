@@ -27,8 +27,8 @@ function run(cmd) {
     exec(cmd, {'stdio': 'inherit'});
   } catch (e) {
     if (e.code === 'ENOENT') {
-      console.error(colors.red('ERROR: sqs-server not installed.\n') +
-        'Please run "npm install -g @squarespace/squarespace-dev-server".\n' +
+      console.error(colors.red('ERROR: squarespace-server not installed.\n') +
+        'Please run "npm install -g @squarespace/squarespace-server".\n' +
         'Visit http://developers.squarespace.com/local-development for more information.');
     }
     process.exit(1);
@@ -38,7 +38,7 @@ function run(cmd) {
 let siteUrl;
 
 Program
-  .usage('sqs-runserver [siteUrl] [options]')
+  .usage('squarespace runserver [siteUrl] [options]')
   .allowUnknownOption()
   .arguments('[siteUrl]')
   .action(function(url) {
@@ -47,7 +47,7 @@ Program
 
 const parsed = Program.parseOptions(process.argv.slice(2));
 if (parsed.unknown.indexOf('--help') >= 0 || parsed.unknown.indexOf('-h') >= 0) {
-  run(['sqs-server', '--help']);
+  run(['squarespace-server', '--help']);
   console.log(/* newline */);
   process.exit(0);
 } else {
@@ -60,8 +60,8 @@ if (!siteUrl) {
 
 if (!siteUrl) {
   Program.outputHelp();
-  console.error(colors.red('ERROR: siteUrl must be provided or else run "sqs setup" first.\n'));
+  console.error(colors.red('ERROR: siteUrl must be provided or else run "squarespace setup" first.\n'));
 } else {
-  const cmd = ['sqs-server'].concat(siteUrl, parsed.unknown);
+  const cmd = ['squarespace-server'].concat(siteUrl, parsed.unknown);
   run(cmd);
 }
