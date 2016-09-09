@@ -103,7 +103,7 @@ Options:
     --host=HOST                         Host that server listens on [default localhost].
 
 
-# Copyright and License
+## Copyright and License
 
 Copyright 2016 Squarespace, INC.
 
