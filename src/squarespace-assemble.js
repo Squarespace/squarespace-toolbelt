@@ -27,6 +27,7 @@
  */
 
 const path = require('path');
+const http = require('http');
 const Program = require('commander');
 const FileUtils = require('./utils/fileutils');
 const Watcher = require('./utils/watch');
@@ -37,6 +38,7 @@ function main(options) {
   const destDir = options.output || path.resolve(process.cwd(), 'build');
 
   const isLegacy = options.legacy || false;
+  const server = options.server ? options.server.replace(/\/$/, "") : "http://localhost:9000";
   const modules = FileUtils.getModules(srcDir);
 
   if (!options.noclean) {
@@ -44,18 +46,26 @@ function main(options) {
     console.log('Destination directory cleaned');
   }
 
+  function reload() {
+    if (options.reload) {
+      http.get(server + '/local-api/autoreload/notify');
+    }
+  }
+
   if (options.watch) {
     Watcher.watchAndCollect({
       srcDir,
       destDir,
       rootDir: srcDir,
-      flags: { isLegacy }
+      flags: { isLegacy },
+      callback: reload
     });
     modules.forEach((mod) => {
       Watcher.watchAndCollect({
         srcDir: mod.path,
         destDir,
-        rootDir: srcDir
+        rootDir: srcDir,
+        callback: reload
       });
     });
   } else {
@@ -74,15 +84,18 @@ function main(options) {
       });
       FileUtils.updateConf(mod.conf, destDir);
     });
+    reload();
   }
 }
 
 Program
-  .option('-n, --noclean', 'Collect without first cleaning the output directory.')
-  .option('-w, --watch', 'Watch for changes and collect incrementally.')
+  .option('-n, --noclean', 'Assemble without first cleaning the output directory.')
+  .option('-w, --watch', 'Watch for changes and assemble incrementally.')
   .option('-d, --directory <directory>', 'Source directory. Default is \'.\'')
-  .option('-o, --output <output>', 'Output directory for collected files. Default is \'build\'')
+  .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
+  .option('-R, --reload', 'Notify Local Development Server when assembled.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
+  .option('--server <url>', 'URL of Local Development Server. Default is \'http://localhost:9000\'')
   .parse(process.argv);
 
 main(Program);
