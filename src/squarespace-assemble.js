@@ -48,7 +48,8 @@ function main(options) {
 
   function reload() {
     if (options.reload) {
-      http.get(server + '/local-api/autoreload/notify');
+      http.get(server + '/local-api/reload')
+          .on('error', ()=>{});
     }
   }
 
