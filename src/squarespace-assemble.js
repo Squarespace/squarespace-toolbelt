@@ -106,7 +106,7 @@ Program
   .option('-w, --watch', 'Watch for changes and assemble incrementally.')
   .option('-d, --directory <directory>', 'Source directory. Default is \'.\'')
   .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
-  .option('-T, --trigger-reload [host]', 'Trigger Local Development Server to reload on each assemble.')
+  .option('-T, --trigger-reload [host:port]', 'Trigger Local Development Server to reload on each assemble.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
   .parse(process.argv);
 
