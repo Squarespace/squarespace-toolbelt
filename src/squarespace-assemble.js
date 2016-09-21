@@ -32,14 +32,26 @@ const Program = require('commander');
 const FileUtils = require('./utils/fileutils');
 const Watcher = require('./utils/watch');
 
+function configServer(options) {
+  let server = "http://localhost:9000";
+  if (typeof options.triggerReload === 'string') {
+    server = options.triggerReload.replace(/\/$/, "");
+    if (server.search(/^http[s]?\:\/\//) == -1) {
+        server = 'http://' + server;
+    }
+  }
+  return server;
+}
+
 function main(options) {
 
   const srcDir = options.directory || process.cwd();
   const destDir = options.output || path.resolve(process.cwd(), 'build');
 
   const isLegacy = options.legacy || false;
-  const server = options.server ? options.server.replace(/\/$/, "") : "http://localhost:9000";
   const modules = FileUtils.getModules(srcDir);
+
+  const server = configServer(options);
 
   if (!options.noclean) {
     FileUtils.deleteBuild(destDir);
@@ -47,8 +59,8 @@ function main(options) {
   }
 
   function reload() {
-    if (options.reload) {
-      http.get(server + '/local-api/reload')
+    if (options.triggerReload) {
+      http.get(server + '/local-api/reload/trigger')
           .on('error', ()=>{});
     }
   }
@@ -94,9 +106,8 @@ Program
   .option('-w, --watch', 'Watch for changes and assemble incrementally.')
   .option('-d, --directory <directory>', 'Source directory. Default is \'.\'')
   .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
-  .option('-R, --reload', 'Notify Local Development Server when assembled.')
+  .option('-T, --trigger-reload [host]', 'Trigger Local Development Server to reload on each assemble.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
-  .option('--server <url>', 'URL of Local Development Server. Default is \'http://localhost:9000\'')
   .parse(process.argv);
 
 main(Program);
