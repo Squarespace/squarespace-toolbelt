@@ -19,9 +19,10 @@ In your package.json you can use Squarespace Toolbelt to automatically run build
         "webpack": "^1.12.9"
       },
       "scripts": {
-        "build": "squarespace assemble && webpack",
-        "watch": "squarespace assemble -w & webpack --watch",
-        "start": "squarespace setup && (npm run watch & squarespace runserver)",
+        "build":  "squarespace assemble && webpack",
+        "watch":  "squarespace assemble -wT & webpack --watch",
+        "server": "squarespace runserver -T",
+        "start":  "squarespace setup && (npm run watch & npm run server)",
         "deploy": "squarspace setup && squarespace deploy"
       }
       ...
@@ -49,17 +50,12 @@ Options:
     -h, --help     output usage information
     -V, --version  output the version number
 
-
-
-
 ### squarespace setup [options]
 
 Options:
 
     -h, --help                   output usage information
     -d, --directory <directory>  Directory to setup. Default is the current one.
-
-
 
 ### squarespace assemble [options]
 
@@ -85,7 +81,6 @@ Options:
 Trigger reload takes an optional [host:post] that defaults to "localhost:9000". You can also provide a full domain with protocol, such as "https://192.168.10.10:3000". Typically all that's needed to watch your template files and trigger the Local Development Server is:
 
     squarespace assemble -wT
-
 
 ### squarespace clean [options]
 
@@ -115,8 +110,10 @@ Options:
     -h --help                           Show this screen.
     -d --template-directory=PATH        Path to cloned template repository [default .].
     -p --port=PORT                      Port that server listens on [default 9000].
+    -T --trigger-reload                 Listen for reload trigger and refresh page.
     --host=HOST                         Host that server listens on [default localhost].
 
+For full squarespace server options, see `squarespace-server --help`.
 
 ## Copyright and License
 
