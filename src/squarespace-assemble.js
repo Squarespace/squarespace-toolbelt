@@ -27,9 +27,21 @@
  */
 
 const path = require('path');
+const http = require('http');
 const Program = require('commander');
 const FileUtils = require('./utils/fileutils');
 const Watcher = require('./utils/watch');
+
+function configServer(options) {
+  let server = "http://localhost:9000";
+  if (typeof options.triggerReload === 'string') {
+    server = options.triggerReload.replace(/\/$/, "");
+    if (server.search(/^http[s]?\:\/\//) == -1) {
+        server = 'http://' + server;
+    }
+  }
+  return server;
+}
 
 function main(options) {
 
@@ -39,9 +51,18 @@ function main(options) {
   const isLegacy = options.legacy || false;
   const modules = FileUtils.getModules(srcDir);
 
+  const server = configServer(options);
+
   if (!options.noclean) {
     FileUtils.deleteBuild(destDir);
     console.log('Destination directory cleaned');
+  }
+
+  function reload() {
+    if (options.triggerReload) {
+      http.get(server + '/local-api/reload/trigger')
+          .on('error', ()=>{});
+    }
   }
 
   if (options.watch) {
@@ -49,13 +70,15 @@ function main(options) {
       srcDir,
       destDir,
       rootDir: srcDir,
-      flags: { isLegacy }
+      flags: { isLegacy },
+      callback: reload
     });
     modules.forEach((mod) => {
       Watcher.watchAndCollect({
         srcDir: mod.path,
         destDir,
-        rootDir: srcDir
+        rootDir: srcDir,
+        callback: reload
       });
     });
   } else {
@@ -74,14 +97,16 @@ function main(options) {
       });
       FileUtils.updateConf(mod.conf, destDir);
     });
+    reload();
   }
 }
 
 Program
-  .option('-n, --noclean', 'Collect without first cleaning the output directory.')
-  .option('-w, --watch', 'Watch for changes and collect incrementally.')
+  .option('-n, --noclean', 'Assemble without first cleaning the output directory.')
+  .option('-w, --watch', 'Watch for changes and assemble incrementally.')
   .option('-d, --directory <directory>', 'Source directory. Default is \'.\'')
-  .option('-o, --output <output>', 'Output directory for collected files. Default is \'build\'')
+  .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
+  .option('-T, --trigger-reload [host:port]', 'Trigger Local Development Server to reload on each assemble.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
   .parse(process.argv);
 

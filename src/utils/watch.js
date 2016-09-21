@@ -42,8 +42,9 @@ const WatchExports = {
    * @param {string} options.rootDir - template source directory
    * @param {Object} options.flags - modifiers for pattern matching
    */
-  watchAndCollect({ srcDir, destDir, rootDir, flags }) {
+  watchAndCollect({ srcDir, destDir, rootDir, flags, callback }) {
     flags = flags || {};
+    callback = callback || (() => {});
 
     /**
      * Guard against any watcher events that ignores certain paths
@@ -76,6 +77,7 @@ const WatchExports = {
       }
 
       FileUtils.copyFile({ filePath, srcDir, destDir, rootDir });
+      callback('change', filePath);
     }
 
     /**
@@ -88,6 +90,7 @@ const WatchExports = {
       const dest = destDir + relPath;
       console.log(colors.red.bold('Removing %s'), dest);
       fs.removeSync(dest);
+      callback('delete', filePath);
     }
 
     const FILE_PATTERNS = patterns.getPatterns(flags);

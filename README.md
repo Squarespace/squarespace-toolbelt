@@ -72,6 +72,21 @@ Options:
     -o, --output <output>        Output directory for collected files. Default is 'build'
     -l, --legacy                 Copies scripts directory for older templates with squarespace:script tags.
 
+    -h, --help                        output usage information
+    -n, --noclean                     Assemble without first cleaning the output directory.
+    -w, --watch                       Watch for changes and assemble incrementally.
+    -d, --directory <directory>       Source directory. Default is '.'
+    -o, --output <output>             Output directory for assembled files. Default is 'build'
+    -T, --trigger-reload [host:port]  Trigger Local Development Server to reload on each assemble.
+    -l, --legacy                      Copies scripts directory for older templates with squarespace:script tags.
+
+#### Using `--trigger-reload`:
+
+Trigger reload takes an optional [host:post] that defaults to "localhost:9000". You can also provide a full domain with protocol, such as "https://192.168.10.10:3000". Typically all that's needed to watch your template files and trigger the Local Development Server is:
+
+    squarespace assemble -wT
+
+
 ### squarespace clean [options]
 
 Options:
