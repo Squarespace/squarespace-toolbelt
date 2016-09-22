@@ -30,6 +30,20 @@ In your package.json you can use Squarespace Toolbelt to automatically run build
 
 Above we include `@squarespace/toolbelt` in the devDependencies, and then use `squarespace assemble` in the project's build and watch scripts.
 
+### Automatic Reloading
+
+The `assemble` command is designed to work with Squarespace Development Server's `--trigger-reload` option to automatically refresh the browser each time a change is detected. To take advantage of this, run `assemble` with the `-T` or `--trigger-reload` and `-w` or `--watch` flags like so:
+
+    squarespace assemble -wT
+
+This will watch your build folder, automatically assembling each time a file changes, and triggering the dev server to reload.
+
+You must also run the dev server with `-T` or `--trigger-reload` to listen for the triggers:
+
+    squarespace runserver -T
+
+For more info see the reference below.
+
 ## Reference
 
 Squarespace Toolbelt exposes several scripts you can use in your template's package.json:
@@ -60,13 +74,6 @@ Options:
 ### squarespace assemble [options]
 
 Options:
-
-    -h, --help                   output usage information
-    -n, --noclean                Collect without first cleaning the output directory.
-    -w, --watch                  Watch for changes and collect incrementally.
-    -d, --directory <directory>  Source directory. Default is '.'
-    -o, --output <output>        Output directory for collected files. Default is 'build'
-    -l, --legacy                 Copies scripts directory for older templates with squarespace:script tags.
 
     -h, --help                        output usage information
     -n, --noclean                     Assemble without first cleaning the output directory.
@@ -103,17 +110,17 @@ Options:
 
 Runs Squarespace Local Development Server.
 
-Requires @squarespace/squarespace-server installed globally.
+Requires @squarespace/server to be installed globally.
 
 Options:
 
-    -h --help                           Show this screen.
+    -h --help                           output usage information
     -d --template-directory=PATH        Path to cloned template repository [default .].
     -p --port=PORT                      Port that server listens on [default 9000].
     -T --trigger-reload                 Listen for reload trigger and refresh page.
     --host=HOST                         Host that server listens on [default localhost].
 
-For full squarespace server options, see `squarespace-server --help`.
+For full squarespace server options, see `squarespace runserver --help`.
 
 ## Copyright and License
 
