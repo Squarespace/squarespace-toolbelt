@@ -45,7 +45,7 @@ function run(cmd) {
   } catch (e) {
     if (e.code === 'ENOENT') {
       console.error(colors.red('ERROR: squarespace-server not installed.\n') +
-        'Please run "npm install -g @squarespace/squarespace-server".\n' +
+        'Please run "npm install -g @squarespace/server".\n' +
         'Visit http://developers.squarespace.com/local-development for more information.');
     }
     process.exit(1);
