@@ -53,7 +53,7 @@ let repoUrl;
 
 function main(options) {
   const directory = options.directory || './build';
-  const message = options.message || 'sqs-deploy ' + Moment().format('lll');
+  const message = options.message || 'squarespace deploy ' + Moment().format('lll');
   const normalizedUrl = repoUrl.replace(/([^:])(\/\/+)/, '$1/')
     .replace(/^http:/, 'https:');
 
@@ -74,7 +74,7 @@ Program
   .option('-d, --directory <directory>',
     'Deploy from this directory. Default is \'build\'')
   .option('-m, --message <message>',
-    'Deployment message. Default is \'sqs-deploy <date time>\'')
+    'Deployment message. Default is \'squarespace deploy <date time>\'')
   .option('-w, --watch',
     'Watch the build directory for changes and deploy automatically.')
   .parse(process.argv);
@@ -91,7 +91,7 @@ if (!repoUrl) {
 if (!repoUrl) {
   Program.outputHelp();
   console.error(colors.red('ERROR: repository must be provided or else ' +
-    'run "sqs setup" first.\n'));
+    'run "squarespace setup" first.\n'));
 } else {
   main(Program);
 }
