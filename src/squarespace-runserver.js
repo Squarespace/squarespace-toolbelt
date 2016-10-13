@@ -52,20 +52,27 @@ function run(cmd) {
   }
 }
 
+function getHelp() {
+  run(['squarespace-server', '--help']);
+  console.log(/* newline */);
+  console.log('NOTE: when running squarespace-server through runserver, default for --directory is \'./build\'');
+  console.log(/* newline */);
+}
+
 let siteUrl;
 
 Program
   .usage('squarespace runserver [siteUrl] [options]')
   .allowUnknownOption()
   .arguments('[siteUrl]')
+  .option('-d, --directory <directory>')
   .action(function(url) {
     siteUrl = url;
   });
 
 const parsed = Program.parseOptions(process.argv.slice(2));
 if (parsed.unknown.indexOf('--help') >= 0 || parsed.unknown.indexOf('-h') >= 0) {
-  run(['squarespace-server', '--help']);
-  console.log(/* newline */);
+  getHelp();
   process.exit(0);
 } else {
   Program.parseArgs(parsed.args, parsed.unknown);
@@ -76,9 +83,11 @@ if (!siteUrl) {
 }
 
 if (!siteUrl) {
-  Program.outputHelp();
+  getHelp();
   console.error(colors.red('ERROR: siteUrl must be provided or else run "squarespace setup" first.\n'));
 } else {
-  const cmd = ['squarespace-server'].concat(siteUrl, parsed.unknown);
+  let dir = Program.directory || './build';
+  const cmd = ['squarespace-server'].concat(siteUrl, '--directory='+dir, parsed.unknown);
+  console.log(cmd)
   run(cmd);
 }
