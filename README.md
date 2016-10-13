@@ -115,10 +115,11 @@ Requires @squarespace/server to be installed globally.
 Options:
 
     -h --help                           output usage information
-    -d --template-directory=PATH        Path to cloned template repository [default .].
+    -d --directory=PATH                 Path to cloned template repository [default ./build].
     -p --port=PORT                      Port that server listens on [default 9000].
     -T --trigger-reload                 Listen for reload trigger and refresh page.
     --host=HOST                         Host that server listens on [default localhost].
+    --auth                              Log in to work on trial or password protected sites.
 
 For full squarespace server options, see `squarespace runserver --help`.
 
