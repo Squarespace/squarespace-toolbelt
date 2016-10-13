@@ -1,4 +1,5 @@
 {
+  "extends": "@sqs/eslint-config-squarespace/vanilla",
   "parser": "babel-eslint",
   "env": {
     "node": true
