@@ -33,11 +33,11 @@ const FileUtils = require('./utils/fileutils');
 const Watcher = require('./utils/watch');
 
 function configServer(options) {
-  let server = "http://localhost:9000";
+  let server = 'http://localhost:9000';
   if (typeof options.triggerReload === 'string') {
-    server = options.triggerReload.replace(/\/$/, "");
-    if (server.search(/^http[s]?\:\/\//) == -1) {
-        server = 'http://' + server;
+    server = options.triggerReload.replace(/\/$/, '');
+    if (server.search(/^http[s]?\:\/\//) === -1) {
+      server = 'http://' + server;
     }
   }
   return server;

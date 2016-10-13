@@ -87,7 +87,6 @@ if (!siteUrl) {
   console.error(colors.red('ERROR: siteUrl must be provided or else run "squarespace setup" first.\n'));
 } else {
   let dir = Program.directory || './build';
-  const cmd = ['squarespace-server'].concat(siteUrl, '--directory='+dir, parsed.unknown);
-  console.log(cmd)
+  const cmd = ['squarespace-server'].concat(siteUrl, '--directory=' + dir, parsed.unknown);
   run(cmd);
 }

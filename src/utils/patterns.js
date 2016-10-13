@@ -32,7 +32,7 @@ const BASE_PATTERNS = [
 /**
  * Returns an array of glob patterns, based on default pattern set.
  * Can be modified with args for edge cases like legacy templates.
- * 
+ *
  * @param  {Boolean} options.isLegacy - `true` for legacy, non-webpacked templates
  * @param  {Boolean} options.ignoreConf - if true, will not copy template.conf file
  * @return {Array} glob patterns that will be copied
