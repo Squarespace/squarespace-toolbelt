@@ -26,11 +26,11 @@
  */
 
 const Program = require('commander');
-const FileUtils = require('./utils/fileutils');
+const FileManager = require('./utils/FileManager');
 
 function main(options) {
   const directory = options.directory || './build';
-  FileUtils.deleteBuild(directory);
+  FileManager.delete(directory);
 }
 
 Program
