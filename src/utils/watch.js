@@ -125,16 +125,16 @@ const WatchExports = {
      * @param  {string} root - root folder of watch monitor
      * @param  {Object} stat - fs.stat object of changed file
      */
-    function doCallback(relpath, root, stat) {
-      const fullPath = path.join(folder, relpath);
-      console.log(colors.cyan.bold('Change detected at %s'), fullPath);
+    function doCallback(filePath) {
+      console.log(colors.cyan.bold('Change detected at %s'), filePath);
       if (typeof callback === 'function') {
-        callback(fullPath);
+        callback(filePath);
       }
     }
 
-    const watcher = chokidar.watch(folder, {
-      ignored: excludePatterns
+    const watcher = chokidar.watch(path.resolve(folder), {
+      ignored: excludePatterns.map((pattern) => path.resolve(folder, pattern)),
+      ignoreInitial: true
     });
     watcher.on('ready', function () {
       console.log('Watching for file changes in %s ...', folder);
@@ -142,7 +142,7 @@ const WatchExports = {
 
     watcher.on('change', doCallback);
     watcher.on('add', doCallback);
-    watcher.on('delete', doCallback);
+    watcher.on('unlink', doCallback);
   }
 
 };
