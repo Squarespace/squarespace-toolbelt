@@ -94,7 +94,7 @@ const _eachSqsModule = (srcDir, cb) => {
   Object.keys(dependencies).forEach(moduleName => {
     const mod = _findModule(srcDir, moduleName);
     if (mod && mod.hasConf) {
-      const modTemplateDir = mod.path + mod.templateDir;
+      const modTemplateDir = path.join(mod.path, mod.templateDir);
       cb(modTemplateDir, moduleName);
       _eachSqsModule(mod.path, cb);
     }
