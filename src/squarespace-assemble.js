@@ -29,7 +29,7 @@
 const path = require('path');
 const http = require('http');
 const Program = require('commander');
-const FileUtils = require('./utils/fileutils');
+const FileManager = require('./utils/FileManager');
 const Watcher = require('./utils/watch');
 
 function configServer(options) {
@@ -46,15 +46,17 @@ function configServer(options) {
 function main(options) {
 
   const srcDir = options.directory || process.cwd();
-  const destDir = options.output || path.resolve(process.cwd(), 'build');
-
+  const buildDir = options.output || path.join(srcDir, 'build');
   const isLegacy = options.legacy || false;
-  const modules = FileUtils.getModules(srcDir);
-
   const server = configServer(options);
 
+  const manager = new FileManager({
+    srcDir,
+    buildDir
+  });
+
   if (!options.noclean) {
-    FileUtils.deleteBuild(destDir);
+    manager.deleteBuild();
     console.log('Destination directory cleaned');
   }
 
@@ -68,35 +70,13 @@ function main(options) {
   if (options.watch) {
     Watcher.watchAndCollect({
       srcDir,
-      destDir,
+      buildDir,
       rootDir: srcDir,
       flags: { isLegacy },
       callback: reload
     });
-    modules.forEach((mod) => {
-      Watcher.watchAndCollect({
-        srcDir: mod.path,
-        destDir,
-        rootDir: srcDir,
-        callback: reload
-      });
-    });
   } else {
-    FileUtils.copyFiles({
-      srcDir,
-      destDir,
-      rootDir: srcDir,
-      flags: { isLegacy }
-    });
-    modules.forEach((mod) => {
-      FileUtils.copyFiles({
-        srcDir: mod.path,
-        destDir,
-        rootDir: srcDir,
-        flags: { ignoreConf: true }
-      });
-      FileUtils.updateConf(mod.conf, destDir);
-    });
+    manager.syncAllFiles({ isLegacy });
     reload();
   }
 }

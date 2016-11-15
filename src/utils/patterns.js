@@ -26,7 +26,8 @@ const BASE_PATTERNS = [
   '/collections/**',
   '/pages/**',
   '/styles/**',
-  '/**.region'
+  '/**.region',
+  '/template.conf'
 ];
 
 /**
@@ -43,10 +44,6 @@ function getPatterns({ isLegacy, ignoreConf }) {
 
   if (isLegacy) {
     patterns.push('/scripts/**');
-  }
-
-  if (!ignoreConf) {
-    patterns.push('/**.conf');
   }
 
   return patterns;

@@ -23,9 +23,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const colors = require('colors');
 const chokidar = require('chokidar');
-const FileUtils = require('./fileutils');
-const patterns = require('./patterns');
-
+const FileManager = require('./FileManager');
 
 const WatchExports = {
 
@@ -42,41 +40,42 @@ const WatchExports = {
    * @param {string} options.rootDir - template source directory
    * @param {Object} options.flags - modifiers for pattern matching
    */
-  watchAndCollect({ srcDir, destDir, rootDir, flags, callback }) {
+  watchAndCollect({ srcDir, buildDir, flags, callback }) {
     flags = flags || {};
     callback = callback || (() => {});
+    const manager = new FileManager({
+      srcDir,
+      buildDir
+    });
 
     /**
-     * Guard against any watcher events that ignores certain paths
-     * from trigger handlers.
+     * Processes the addition of a file matching the watch pattern.
      *
-     * @param {Function} handler - the handler to guard
-     * @return {Function} the guarded change handler function
+     * @param  {string} filePath - source path of added file
      */
-    function guardedChangeHandlerFactory(handler) {
-      return function(filePath) {
-        if (filePath.indexOf(destDir) >= 0) {
-          return;
+    function handleAdd(filePath) {
+      manager.getFiles((file) => {
+        if (file.filePath === filePath) {
+          manager.syncFile(filePath);
         }
-
-        handler.apply(null, arguments);
-      };
+      }, flags);
+      callback('add', filePath);
     }
 
     /**
-     * Processes the change or addition of a file matching
-     * the watch pattern. A change in template.conf will recursively
-     * update the conf file from nested template modules.
+     * Processes the change of a file matching the watch pattern. A change in
+     * template.conf or a collection.conf will wipe out the existing conf file
+     * in build and rebuild it.
      *
      * @param {string} filePath - source path of the modified file
      */
     function handleChange(filePath) {
-      if (filePath.indexOf('template.conf') >= 0) {
-        FileUtils.updateAllModuleConfs({ srcDir, destDir, rootDir });
+      if (filePath.indexOf('conf') >= 0) {
+        manager.updateAllModuleConfs(filePath);
+        callback('change', filePath);
         return;
       }
-
-      FileUtils.copyFile({ filePath, srcDir, destDir, rootDir });
+      manager.syncFile(filePath);
       callback('change', filePath);
     }
 
@@ -87,22 +86,26 @@ const WatchExports = {
      */
     function handleDelete(filePath) {
       const relPath = filePath.replace(srcDir, '');
-      const dest = destDir + relPath;
+      const dest = buildDir + relPath;
       console.log(colors.red.bold('Removing %s'), dest);
       fs.removeSync(dest);
       callback('delete', filePath);
     }
 
-    const FILE_PATTERNS = patterns.getPatterns(flags);
-    const watcher = chokidar.watch(FILE_PATTERNS.map((glob) => {
-      return srcDir + glob;
-    }), {
-      ignored: srcDir + '/.DS_Store'
+    const paths = [];
+    manager.getFiles((file) => {
+      paths.push(file.filePath);
+    }, flags);
+    const watcher = chokidar.watch(paths, {
+      ignored: [
+        srcDir + '/.DS_Store',
+        buildDir
+      ]
     });
 
-    watcher.on('change', guardedChangeHandlerFactory(handleChange));
-    watcher.on('add', guardedChangeHandlerFactory(handleChange));
-    watcher.on('unlink', guardedChangeHandlerFactory(handleDelete));
+    watcher.on('change', handleChange);
+    watcher.on('add', handleAdd);
+    watcher.on('unlink', handleDelete);
   },
 
   /**
@@ -122,16 +125,16 @@ const WatchExports = {
      * @param  {string} root - root folder of watch monitor
      * @param  {Object} stat - fs.stat object of changed file
      */
-    function doCallback(relpath, root, stat) {
-      const fullPath = path.join(folder, relpath);
-      console.log(colors.cyan.bold('Change detected at %s'), fullPath);
+    function doCallback(filePath) {
+      console.log(colors.cyan.bold('Change detected at %s'), filePath);
       if (typeof callback === 'function') {
-        callback(fullPath);
+        callback(filePath);
       }
     }
 
-    const watcher = chokidar.watch(folder, {
-      ignored: excludePatterns
+    const watcher = chokidar.watch(path.resolve(folder), {
+      ignored: excludePatterns.map((pattern) => path.resolve(folder, pattern)),
+      ignoreInitial: true
     });
     watcher.on('ready', function () {
       console.log('Watching for file changes in %s ...', folder);
@@ -139,7 +142,7 @@ const WatchExports = {
 
     watcher.on('change', doCallback);
     watcher.on('add', doCallback);
-    watcher.on('delete', doCallback);
+    watcher.on('unlink', doCallback);
   }
 
 };
