@@ -305,7 +305,7 @@ const Deployment = {
    * @param {boolean} ensureRemote - create remote if not already there.
    */
   async deploy(folder, url, buildMessage, ensureRemote) {
-    const noCredsUrl = url.replace(/\/\/.*?:.*?@/, '');
+    const noCredsUrl = url.replace(/(\/\/).*?:.*?@/, '$1');
     console.log(`Deploying files in ${folder} to ${noCredsUrl}...`);
     let repo = await Deployment.ensureRepo(folder, url);
     if (!repo) {
