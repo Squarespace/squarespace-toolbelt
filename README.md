@@ -123,6 +123,9 @@ Options:
 
 For full squarespace server options, see `squarespace runserver --help`.
 
+## Contributing
+We are currently not accepting contributions to Squarespace Toolbelt.
+
 ## Copyright and License
 
 Copyright 2016 Squarespace, INC.
