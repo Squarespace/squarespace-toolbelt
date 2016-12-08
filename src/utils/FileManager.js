@@ -36,42 +36,49 @@ const { merge } = require('./confutils');
  * @param {string} dep - dependency (npm) name
  * @return {Object}  - { modPath, templateDir, conf }
  */
-const _findModule = (srcDir, dep) => {
-  const modPath = path.resolve(srcDir, 'node_modules', dep);
+const findModule = (startDir, dep) => {
+  const modPath = path.join(startDir, 'node_modules', dep);
   let mod = {
     path: modPath
   };
 
   try {
-
-    // Package
-    const packagePath = path.resolve(modPath, 'package.json');
-    let pkg = fs.readJsonSync(packagePath);
-    if (pkg && get(pkg, 'directories.squarespace')) {
-      // TODO: Better path handling logic
-      mod.templateDir = '/' + pkg.directories.squarespace;
+    const packagePath = path.join(modPath, 'package.json');
+    const packageJson = fs.readJsonSync(packagePath);
+    if (packageJson && get(packageJson, 'directories.squarespace')) {
+      mod.templateDir = packageJson.directories.squarespace;
     } else {
       mod.templateDir = '';
     }
+    const confPath = path.join(modPath, mod.templateDir, 'template.conf');
+    mod.hasConf = !!fs.lstatSync(confPath);
 
-    // Conf
-    const confPath = path.resolve(modPath + mod.templateDir, 'template.conf');
-    mod.hasConf = fs.lstatSync(confPath);
   } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(err.message);
+      return null;
+    }
+
     const numberOfLevels = modPath.match(/node_modules/gi).length;
-    if (err.code === 'ENOENT' && numberOfLevels > 1) {
-      let pathArr = modPath.split('/');
-      pathArr = pathArr.slice(0, pathArr.lastIndexOf('node_modules') - 2);
-      const newPath = pathArr.join('/');
-      mod = _findModule(newPath, dep);
-    } else {
-      if (err.code !== 'ENOENT') {
-        console.error('Oh no, there was an error: ' + err.message);
+    if (numberOfLevels > 1) {
+      // Couldn't find dependency at this level that satisfied requirements,
+      // so go one level up by finding the second to last occurrence of
+      // "node_modules" in the path and try again.
+      let pathArr = modPath.split(path.sep);
+      let nodeModulesOccurrences = 0;
+      for (let i = pathArr.length - 1; i >= 0; i--) {
+        if (pathArr[i] === 'node_modules') {
+          nodeModulesOccurrences++;
+        }
+        if (nodeModulesOccurrences > 1) {
+          pathArr = pathArr.slice(0, i);
+          break;
+        }
       }
-      return;
+      const newPath = pathArr.join(path.sep);
+      mod = findModule(newPath, dep);
     }
   }
-
 
   return mod;
 };
@@ -82,21 +89,21 @@ const _findModule = (srcDir, dep) => {
  * @param {string} srcDir - directory to search from
  * @param {Function} cb - callback to execute
  */
-const _eachSqsModule = (srcDir, cb) => {
-  let pkg;
+const eachModule = (srcDir, callback) => {
+  let packageJson;
   try {
-    pkg = require(path.resolve(srcDir, 'package.json'));
+    packageJson = require(path.join(srcDir, 'package.json'));
   } catch (err) {
-    console.error('Oh no, there was an error: ' + err.message);
-    return false;
+    console.error(err.message);
+    return;
   }
-  const dependencies = pkg.dependencies || {};
+  const dependencies = packageJson.dependencies || {};
   Object.keys(dependencies).forEach(moduleName => {
-    const mod = _findModule(srcDir, moduleName);
+    const mod = findModule(srcDir, moduleName);
     if (mod && mod.hasConf) {
       const modTemplateDir = path.join(mod.path, mod.templateDir);
-      cb(modTemplateDir, moduleName);
-      _eachSqsModule(mod.path, cb);
+      callback(modTemplateDir, moduleName);
+      eachModule(mod.path, callback);
     }
   });
 };
@@ -158,7 +165,7 @@ class FileManager {
    */
   getModules() {
     const modules = {};
-    _eachSqsModule(this.srcDir, (modulePath, moduleName) => {
+    eachModule(this.srcDir, (modulePath, moduleName) => {
       modules[moduleName] = {
         name: moduleName,
         filePath: modulePath
