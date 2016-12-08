@@ -211,7 +211,7 @@ const Deployment = {
     console.log('Pulling from remote...');
     const remote = gitUrlToOriginName(repoUrl);
     return new Promise((resolve, reject) => {
-      repo.pull([remote, 'master'], {'strategy': 'ours', 'allow-unrelated-histories': '' },
+      repo.pull([remote, 'master'], {'strategy': 'ours' },
         finishWithGitResult(repo, resolve, reject));
     });
   },
