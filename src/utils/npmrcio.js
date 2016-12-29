@@ -20,10 +20,8 @@
  */
 
 const fs = require('fs');
-const path = require('path');
 const splitlines = require('split-lines');
 
-const NPMRC_FILE = '.npmrc';
 
 /**
  * Reads an .npmrc file, returning an object containing the keys and values.
@@ -41,15 +39,14 @@ const NPMRC_FILE = '.npmrc';
  * @param {string} rootFolder - the folder containing the .npmrc file.
  * @return {object} an object containing the keys and values in the file.
  */
-function readNpmrcSync(rootFolder) {
-  const npmrcPath = path.join(rootFolder, NPMRC_FILE);
+function readNpmrcSync(filePath) {
   let result = {};
   let content;
   try {
-    content = fs.readFileSync(npmrcPath, {encoding: 'utf8'});
+    content = fs.readFileSync(filePath, {encoding: 'utf8'});
   } catch (e) {
     if (e.code === 'ENOENT') {
-      return undefined;
+      return;
     }
     throw e;
   }
@@ -78,7 +75,7 @@ function readNpmrcSync(rootFolder) {
  * @param {object} data - an object containing the keys and values.
  * @param {string} rootFolder - the folder in which to write the .npmrc file.
  */
-function writeNpmrcSync(data, rootFolder) {
+function writeNpmrcSync(data, filePath) {
   let output = '';
   for (let key of Object.keys(data)) {
     if (!key) {
@@ -92,8 +89,7 @@ function writeNpmrcSync(data, rootFolder) {
       output += key + '=' + data[key] + '\n';
     }
   }
-  const npmrcPath = path.join(rootFolder, NPMRC_FILE);
-  fs.writeFileSync(npmrcPath, output, {mode: 0o600});
+  fs.writeFileSync(filePath, output, {mode: 0o600});
 }
 
 module.exports = {

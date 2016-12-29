@@ -1,7 +1,23 @@
 {
-  "parser": "babel-eslint",
+  "extends": "eslint:recommended",
   "env": {
-    "node": true,
-    "es6": true
+    "es6": true,
+    "node": true
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    "arrow-body-style": [1, "as-needed"],
+    "eqeqeq": 2,
+    "no-console": 0,
+    "no-undef-init": 2,
+    "no-undefined": 1,
+    "no-unused-vars": [1, {"vars": "all", "args": "none"}],
+    "no-use-before-define": 1,
+    "no-useless-constructor": 2,
+    "semi": [2, "always"]
   }
 }
