@@ -122,9 +122,9 @@ export function getWebsites() {
  * @return {promise} A promise that resolves to true if login succeeded, otherwise
  * the promise will throw an error.
  */
-export function login() {
+export function login(acctData = null) {
 
-  const settings = readSettings() || {};
+  let settings = readSettings() || {};
   const authToken = settings[Constants.Keys.AUTH_TOKEN];
   const checkAuthToken = getWebsites;
 
@@ -155,7 +155,11 @@ export function login() {
     }
   }
 
-  if (authToken) {
+  if (acctData) {
+    return sendLoginRequest(acctData)
+      .then(handleLoginResponse)
+      .catch(handleLoginError);
+  } else if (authToken) {
     Cookies.setCookie('secureauthtoken', authToken);
     return checkAuthToken()
       .catch(e => {
@@ -207,6 +211,14 @@ export function createSite(cloneFromId) {
     }
   }
 
+  function finalize([loginResult, pollResult]) {
+    if (!loginResult) {
+      console.error("Failed to login after creating site. Please try logging in again.");
+      process.exit(1);
+    }
+    return Promise.resolve(pollResult);
+  }
+
   function pollSignup(jobId) {
     return requestJson('GET', `${Constants.SIGNUP_POLL}/${jobId}`)
       .then(res => {
@@ -231,7 +243,7 @@ export function createSite(cloneFromId) {
     return requestJson('POST', `${Constants.SIGNUP_URL}`, payload)
       .then(res => {
         handleFormErrors(res.body);
-        return res.body.id;
+        return [acctData, res.body.id];
       });
   }
 
@@ -267,5 +279,6 @@ export function createSite(cloneFromId) {
   return loginOrSignup()
     .then(getSignupKey)
     .then(doCreateSite)
-    .then(pollSignup);
+    .then(([acctData, jobId])=>Promise.all([login(acctData), pollSignup(jobId)]))
+    .then(finalize);
 }
