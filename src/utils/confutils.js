@@ -18,12 +18,6 @@
 const colors = require('colors');
 
 /**
- * Number of additional spaces to indent each time merge is recursivly called.
- * @type {Number}
- */
-const spaces = 2;
-
-/**
  * Used to merge arrays consisted of objects. In those cases, the objects will
  * typically have a "primary key", which can be used to compare them and
  * determine whether to replace values or not.
@@ -177,9 +171,7 @@ function merge(a, b, indent = 2) {
       }
 
       valB.forEach((itemB) => {
-        const isPresentInA = valA.some((itemA) => {
-          return itemA[primaryKey] === itemB[primaryKey];
-        });
+        const isPresentInA = valA.some((itemA) => itemA[primaryKey] === itemB[primaryKey]);
         if (!isPresentInA) {
           valA.push(itemB);
           log(`Pushing object with ${primaryKey} ${itemB[primaryKey]} to ${key} array`, indent);

@@ -29,12 +29,17 @@
 /* eslint-disable no-process-exit */
 
 const Program = require('commander');
-const Setup = require('./utils/setup');
+const setup = require('./utils/setup');
+const checkForServer = require('./utils/checkForServer');
 
 function main(options) {
   const rootDir = process.cwd();
   const directory = options.directory || rootDir;
-  Setup.setup(directory);
+  checkForServer().then(() => {
+    setup.setup(directory);
+  }).catch(() => {
+    process.exit(1);
+  });
 }
 
 Program

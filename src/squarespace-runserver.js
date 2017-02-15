@@ -38,18 +38,12 @@ const colors = require('colors');
 const Program = require('commander');
 const exec = require('./utils/exec');
 const setup = require('./utils/setup');
+const checkForServer = require('./utils/checkForServer');
 
 function run(cmd) {
-  try {
+  checkForServer().then(() => {
     exec(cmd, {'stdio': 'inherit'});
-  } catch (e) {
-    if (e.code === 'ENOENT') {
-      console.error(colors.red('ERROR: squarespace-server not installed.\n') +
-        'Please run "npm install -g @squarespace/server".\n' +
-        'Visit http://developers.squarespace.com/local-development for more information.');
-    }
-    process.exit(1);
-  }
+  });
 }
 
 function getHelp() {
@@ -73,7 +67,6 @@ Program
 const parsed = Program.parseOptions(process.argv.slice(2));
 if (parsed.unknown.indexOf('--help') >= 0 || parsed.unknown.indexOf('-h') >= 0) {
   getHelp();
-  process.exit(0);
 } else {
   Program.parseArgs(parsed.args, parsed.unknown);
 }
