@@ -33,7 +33,7 @@ export const SIGNUP_JOB_COMPLETE = 3;
 export const SIGNUP_JOB_PENDING = [1, 2, 6];
 
 export const GLOBAL_SETTINGS_FILE = '.squarespace';
-export const GLOBAL_SETTINGS_PATH = path.resolve(homedir(), GLOBAL_SETTINGS_FILE);
+export const GLOBAL_SETTINGS_PATH = path.resolve(homedir() || '', GLOBAL_SETTINGS_FILE);
 export const NPMRC_FILE = '.npmrc';
 
 export const USER_AGENT = 'Squarespace Toolbelt (Squarespace)';
