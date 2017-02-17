@@ -25,6 +25,7 @@ const del = require('del');
 const path = require('path');
 const colors = require('colors');
 const glob = require('glob');
+const slash = require('slash');
 const { get, values } = require('lodash/object');
 const patterns = require('./patterns');
 const { merge } = require('./confutils');
@@ -183,10 +184,12 @@ class FileManager {
    * @return {string} - relative path
    */
   getRelativePath(filePath, dir) {
+    filePath = slash(filePath);
     if (dir) {
+      dir = slash(dir);
       return filePath.replace(dir, '');
     }
-    return filePath.replace(this.srcDir, '');
+    return filePath.replace(slash(this.srcDir), '');
   }
 
   /**

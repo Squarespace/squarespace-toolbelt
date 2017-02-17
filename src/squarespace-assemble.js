@@ -27,7 +27,6 @@
  */
 
 const path = require('path');
-const slash = require('slash');
 const http = require('http');
 const Program = require('commander');
 const FileManager = require('./utils/FileManager');
@@ -46,7 +45,7 @@ function configServer(options) {
 
 function main(options) {
 
-  const srcDir = options.directory || slash(process.cwd());
+  const srcDir = options.directory || process.cwd();
   const buildDir = options.output || path.join(srcDir, 'build');
   const isLegacy = options.legacy || false;
   const server = configServer(options);
