@@ -47,12 +47,19 @@ function main(options) {
 
   const srcDir = options.directory || process.cwd();
   const buildDir = options.output || path.join(srcDir, 'build');
+  const omit = (options.omit && options.omit.split(',')) || [];
   const isLegacy = options.legacy || false;
   const server = configServer(options);
 
+  // omit scripts directory, unless the legacy flag is set
+  if (!isLegacy){
+    omit.push('scripts');
+  }
+
   const manager = new FileManager({
     srcDir,
-    buildDir
+    buildDir,
+    omit
   });
 
   if (!options.noclean) {
@@ -72,11 +79,11 @@ function main(options) {
       srcDir,
       buildDir,
       rootDir: srcDir,
-      flags: { isLegacy },
+      flags: { omit },
       callback: reload
     });
   } else {
-    manager.syncAllFiles({ isLegacy });
+    manager.syncAllFiles();
     reload();
   }
 }
@@ -87,6 +94,7 @@ Program
   .option('-d, --directory <directory>', 'Source directory. Default is \'.\'')
   .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
   .option('-T, --trigger-reload [host:port]', 'Trigger Local Development Server to reload on each assemble.')
+  .option('-m, --omit <type>', `Skip template components during assembly, comma separated (e.g. styles,blocks)`)
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
   .parse(process.argv);
 
