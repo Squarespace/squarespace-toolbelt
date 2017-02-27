@@ -58,7 +58,7 @@ function getPatterns({ omit }) {
   }
 
   // flatten object into an array of glob patterns
-  values(basePatterns);
+  return values(basePatterns);
 }
 
 module.exports = {
