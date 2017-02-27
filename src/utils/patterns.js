@@ -30,6 +30,7 @@ const BASE_PATTERNS = {
   styles:      '/styles/**',
   conf:        '/template.conf'
 };
+const { values } = require('lodash/object');
 
 /**
  * Returns an array of glob patterns, based on default pattern set.
@@ -57,7 +58,7 @@ function getPatterns({ omit }) {
   }
 
   // flatten object into an array of glob patterns
-  return Object.keys(basePatterns).map( patternType => basePatterns[patternType] );
+  values(basePatterns);
 }
 
 module.exports = {
