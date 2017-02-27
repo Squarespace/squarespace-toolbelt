@@ -118,10 +118,6 @@ class FileManager {
   constructor(config) {
     this.srcDir = config.srcDir;
     this.buildDir = config.buildDir;
-
-    this.flags = {
-      omit: config.omit
-    };
   }
 
   /**
@@ -131,7 +127,7 @@ class FileManager {
    * @param {Function} cb - callback to execute
    * @param {Object} flags - map of flags
    */
-  getFiles(cb, flags = this.flags) {
+  getFiles(cb, flags) {
     const modules = this.getModules();
     let files = {};
     const filePatterns = patterns.getPatterns(flags);

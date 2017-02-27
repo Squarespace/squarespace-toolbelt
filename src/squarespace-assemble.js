@@ -58,8 +58,7 @@ function main(options) {
 
   const manager = new FileManager({
     srcDir,
-    buildDir,
-    omit
+    buildDir
   });
 
   if (!options.noclean) {
@@ -83,7 +82,7 @@ function main(options) {
       callback: reload
     });
   } else {
-    manager.syncAllFiles();
+    manager.syncAllFiles({ omit });
     reload();
   }
 }
