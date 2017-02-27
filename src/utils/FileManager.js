@@ -221,7 +221,7 @@ class FileManager {
     }
     const { filePath, relPath, moduleName } = file;
     const isModConf = filePath.indexOf('conf') >= 0 && moduleName;
-    const destPath = path.join(this.buildDir, relPath);
+    let destPath = path.join(this.buildDir, relPath);
     const srcFileExists = fs.existsSync(filePath);
     const destFileExists = fs.existsSync(destPath);
     if (isModConf && destFileExists) {
@@ -233,6 +233,12 @@ class FileManager {
     }
     const originPath = filePath.replace(this.srcDir, '');
     const destPathRelative = destPath.replace(this.srcDir, '');
+    const fileParts = path.parse(originPath);
+
+    // ensure .region files arrive in the base dest directory, not nested
+    if (fileParts.ext === '.region'){
+      destPath = path.join(this.buildDir, fileParts.base);
+    }
     console.log(colors.cyan.bold(`Copying ${originPath} to ${destPathRelative}`));
     fs.copySync(filePath, destPath);
     return true;
