@@ -98,7 +98,8 @@ const WatchExports = {
     }, flags);
     const watcher = chokidar.watch(paths, {
       ignored: [
-        srcDir + '/.DS_Store',
+        path.join(srcDir, '.DS_Store'),
+        path.join(srcDir, '**/.DS_Store'),
         buildDir
       ]
     });
