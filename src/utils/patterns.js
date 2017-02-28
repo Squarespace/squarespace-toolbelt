@@ -31,19 +31,18 @@ const BASE_PATTERNS = {
   conf:        '/template.conf'
 };
 const { values } = require('lodash/object');
+const { difference } = require('lodash/array');
 
 /**
- * Returns an array of glob patterns, based on default pattern set.
- * Can be modified with args for edge cases like legacy templates.
+ * Returns an array of glob patterns that will be omitted
  *
- * @param  {Boolean} options.isLegacy - `true` for legacy, non-webpacked templates
- * @param  {Boolean} options.ignoreConf - if true, will not copy template.conf file
- * @return {Array} glob patterns that will be copied
+ * @param  {Object} patterns - a map of the patterns, typically BASE_PATTERNS
+ * @param  {Array}  omit - keys (string) in BASE_PATTERNS to omit
+ * @return {Array}  glob patterns that will be omitted
  */
-function getPatterns({ omit }) {
+function getOmittedPatterns(patterns, omit) {
 
-  // make a fresh copy for mutation
-  const basePatterns = Object.assign({}, BASE_PATTERNS);
+  const omittedPatterns = [];
 
   // remove any types we want to exclude
   if (omit && omit.length) {
@@ -51,14 +50,30 @@ function getPatterns({ omit }) {
     omit.forEach( (omit) => {
 
       // ensure the omission is a valid pattern type
-      if (basePatterns[omit]) {
-        delete basePatterns[omit];
+      if (patterns[ omit ]) {
+        omittedPatterns.push(patterns[ omit ]);
       }
     });
   }
 
   // flatten object into an array of glob patterns
-  return values(basePatterns);
+  return values(omittedPatterns);
+}
+
+/**
+ * Returns an array of glob patterns, based on default pattern set.
+ * Can be modified with args for edge cases like legacy templates.
+ *
+ * @param  {Array} options.omit - keys (string) in BASE_PATTERNS to omit
+ * @return {Array} glob patterns that will be copied
+ */
+function getPatterns({ omit }) {
+
+  // make a fresh copy for mutation
+  const basePatterns = Object.assign({}, BASE_PATTERNS);
+
+  // flatten object into an array of glob patterns, removing the patterns to omit
+  return difference(values(basePatterns), getOmittedPatterns(basePatterns, omit));
 }
 
 module.exports = {
