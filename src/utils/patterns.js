@@ -78,5 +78,6 @@ function getPatterns({ omit }) {
 
 module.exports = {
   getPatterns,
+  getOmittedPatterns,
   BASE_PATTERNS
 };
