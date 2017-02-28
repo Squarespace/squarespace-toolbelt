@@ -97,6 +97,7 @@ const WatchExports = {
       paths.push(file.filePath);
     }, flags);
     const watcher = chokidar.watch(paths, {
+      ignoreInitial: true,
       ignored: [
         path.join(srcDir, '.DS_Store'),
         path.join(srcDir, '**/.DS_Store'),

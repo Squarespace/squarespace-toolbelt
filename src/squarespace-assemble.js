@@ -74,6 +74,7 @@ function main(options) {
   }
 
   if (options.watch) {
+    manager.syncAllFiles({ omit });
     Watcher.watchAndCollect({
       srcDir,
       buildDir,
