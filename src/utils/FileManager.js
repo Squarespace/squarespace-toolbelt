@@ -92,7 +92,7 @@ const findModule = (startDir, dep) => {
 const eachModule = (srcDir, callback) => {
   let packageJson;
   try {
-    packageJson = require(path.join(srcDir, 'package.json'));
+    packageJson = require(path.join(process.cwd(), 'package.json'));
   } catch (err) {
     console.error(err.message);
     return;
