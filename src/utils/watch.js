@@ -92,6 +92,15 @@ const WatchExports = {
       callback('delete', filePath);
     }
 
+    /**
+     * Used for logging when the watcher is ready
+     *
+     * @param {string} pathCount - THe number of files being watched
+     */
+    function handleReady(pathCount) {
+      console.log(colors.yellow.bold('Watching %d files...'), pathCount);
+    }
+
     const paths = [];
     manager.getFiles((file) => {
       paths.push(file.filePath);
@@ -108,6 +117,7 @@ const WatchExports = {
     watcher.on('change', handleChange);
     watcher.on('add', handleAdd);
     watcher.on('unlink', handleDelete);
+    watcher.on('ready', handleReady.bind(null, paths.length));
   },
 
   /**
