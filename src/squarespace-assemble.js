@@ -51,20 +51,10 @@ function main(options) {
   const isLegacy = options.legacy || false;
   const server = configServer(options);
 
-  // omit scripts directory, unless the legacy flag is set
-  if (!isLegacy){
-    omit.push('scripts');
-  }
-
   const manager = new FileManager({
     srcDir,
     buildDir
   });
-
-  if (!options.noclean) {
-    manager.deleteBuild();
-    console.log('Destination directory cleaned');
-  }
 
   function reload() {
     if (options.triggerReload) {
@@ -73,6 +63,22 @@ function main(options) {
     }
   }
 
+  /**
+   * Options
+   */
+
+  // --legacy, omit the scripts folder if not active
+  if (!isLegacy){
+    omit.push('scripts');
+  }
+
+  // --noclean
+  if (!options.noclean) {
+    manager.deleteBuild();
+    console.log('Destination directory cleaned');
+  }
+
+  // --watch
   if (options.watch) {
     manager.syncAllFiles({ omit });
     Watcher.watchAndCollect({
