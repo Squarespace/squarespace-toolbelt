@@ -31,34 +31,6 @@ const BASE_PATTERNS = {
   conf:        '/template.conf'
 };
 const { values } = require('lodash/object');
-const { difference } = require('lodash/array');
-
-/**
- * Returns an array of glob patterns that will be omitted
- *
- * @param  {Object} patterns - a map of the patterns, typically BASE_PATTERNS
- * @param  {Array}  omit - keys (string) in BASE_PATTERNS to omit
- * @return {Array}  glob patterns that will be omitted
- */
-function getOmittedPatterns(patterns, omit) {
-
-  const omittedPatterns = [];
-
-  // remove any types we want to exclude
-  if (omit && omit.length) {
-
-    omit.forEach( (omit) => {
-
-      // ensure the omission is a valid pattern type
-      if (patterns[ omit ]) {
-        omittedPatterns.push(patterns[ omit ]);
-      }
-    });
-  }
-
-  // flatten object into an array of glob patterns
-  return values(omittedPatterns);
-}
 
 /**
  * Returns an array of glob patterns, based on default pattern set.
@@ -70,14 +42,25 @@ function getOmittedPatterns(patterns, omit) {
 function getPatterns({ omit }) {
 
   // make a fresh copy for mutation
-  const basePatterns = Object.assign({}, BASE_PATTERNS);
+  const patterns = Object.assign({}, BASE_PATTERNS);
 
-  // flatten object into an array of glob patterns, removing the patterns to omit
-  return difference(values(basePatterns), getOmittedPatterns(basePatterns, omit));
+  // remove any types we want to exclude
+  if (omit && omit.length) {
+
+    omit.forEach( (omit) => {
+
+      // ensure the omission is a valid pattern type
+      if (patterns[ omit ]) {
+        delete patterns[ omit ];
+      }
+    });
+  }
+
+  // flatten object into an array of glob patterns
+  return values(patterns);
 }
 
 module.exports = {
   getPatterns,
-  getOmittedPatterns,
   BASE_PATTERNS
 };
