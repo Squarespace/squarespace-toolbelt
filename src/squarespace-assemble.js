@@ -47,13 +47,15 @@ function main(options) {
 
   const srcDir = options.directory || process.cwd();
   const buildDir = options.output || path.join(srcDir, 'build');
+  const packageJsonDir = path.resolve(process.cwd(), options.package) || process.cwd();
   const omit = (options.omit && options.omit.split(',')) || [];
   const isLegacy = options.legacy || false;
   const server = configServer(options);
 
   const manager = new FileManager({
     srcDir,
-    buildDir
+    buildDir,
+    packageJsonDir
   });
 
   function reload() {
@@ -82,8 +84,7 @@ function main(options) {
   if (options.watch) {
     manager.syncAllFiles({ omit });
     Watcher.watchAndCollect({
-      srcDir,
-      buildDir,
+      manager,
       rootDir: srcDir,
       flags: { omit },
       callback: reload
@@ -101,6 +102,7 @@ Program
   .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
   .option('-T, --trigger-reload [host:port]', 'Trigger Local Development Server to reload on each assemble.')
   .option('-m, --omit <type>', `Skip template components during assembly, comma separated (e.g. styles,blocks)`)
+  .option('-p, --package <directory> Directory containing package.json. Default is the current working directory.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
   .parse(process.argv);
 

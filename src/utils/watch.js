@@ -23,7 +23,6 @@ const path = require('path');
 const fs = require('fs-extra');
 const colors = require('colors');
 const chokidar = require('chokidar');
-const FileManager = require('./FileManager');
 
 const WatchExports = {
 
@@ -40,13 +39,9 @@ const WatchExports = {
    * @param {string} options.rootDir - template source directory
    * @param {Object} options.flags - modifiers for pattern matching
    */
-  watchAndCollect({ srcDir, buildDir, flags, callback }) {
+  watchAndCollect({ manager, flags, callback }) {
     flags = flags || {};
     callback = callback || (() => {});
-    const manager = new FileManager({
-      srcDir,
-      buildDir
-    });
 
     /**
      * Processes the addition of a file matching the watch pattern.
@@ -85,8 +80,8 @@ const WatchExports = {
      * @param {string} filePath - the absolute path of the file that was removed
      */
     function handleDelete(filePath) {
-      const relPath = filePath.replace(srcDir, '');
-      const dest = buildDir + relPath;
+      const relPath = filePath.replace(manager.srcDir, '');
+      const dest = manager.buildDir + relPath;
       console.log(colors.red.bold('Removing %s'), dest);
       fs.removeSync(dest);
       callback('delete', filePath);
@@ -108,9 +103,9 @@ const WatchExports = {
     const watcher = chokidar.watch(paths, {
       ignoreInitial: true,
       ignored: [
-        path.join(srcDir, '.DS_Store'),
-        path.join(srcDir, '**/.DS_Store'),
-        buildDir
+        path.join(manager.srcDir, '.DS_Store'),
+        path.join(manager.srcDir, '**/.DS_Store'),
+        manager.buildDir
       ]
     });
 
