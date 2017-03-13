@@ -170,10 +170,13 @@ function merge(a, b, indent = 2) {
         return;
       }
 
+      // Default push to the end of the array, except stylesheets. They should go at the beginning
+      const arrayOperation = (primaryKey === 'stylesheets') ? 'unshift' : 'push';
+
       valB.forEach((itemB) => {
         const isPresentInA = valA.some((itemA) => itemA[primaryKey] === itemB[primaryKey]);
         if (!isPresentInA) {
-          valA.push(itemB);
+          valA[arrayOperation](itemB);
           log(`Pushing object with ${primaryKey} ${itemB[primaryKey]} to ${key} array`, indent);
         }
       });
