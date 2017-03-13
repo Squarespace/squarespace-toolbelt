@@ -164,6 +164,12 @@ function merge(a, b, indent = 2) {
         return;
       }
 
+      const primaryKey = keyMap[key];
+      if (!primaryKey) {
+        log(`Array ${key} contains arrays, or objects not present in keyMap`, indent);
+        return;
+      }
+
       valB.forEach((itemB) => {
         const isPresentInA = valA.some((itemA) => itemA[primaryKey] === itemB[primaryKey]);
         if (!isPresentInA) {
