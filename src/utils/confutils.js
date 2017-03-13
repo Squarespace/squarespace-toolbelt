@@ -157,8 +157,8 @@ function merge(a, b, indent = 2) {
       if (containsScalar(valA) && containsScalar(valB)) {
         valB.forEach((item) => {
           if (valA.indexOf(item) === -1) {
-            valA.push(item);
-            log(`Pushing ${item} to ${key} array`, indent);
+            valA.unshift(item);
+            log(`Prepending ${item} to ${key} array`, indent);
           }
         });
         return;
@@ -173,8 +173,8 @@ function merge(a, b, indent = 2) {
       valB.forEach((itemB) => {
         const isPresentInA = valA.some((itemA) => itemA[primaryKey] === itemB[primaryKey]);
         if (!isPresentInA) {
-          valA.push(itemB);
-          log(`Pushing object with ${primaryKey} ${itemB[primaryKey]} to ${key} array`, indent);
+          valA.unshift(itemB);
+          log(`Prepending object with ${primaryKey} ${itemB[primaryKey]} to ${key} array`, indent);
         }
       });
       return;
