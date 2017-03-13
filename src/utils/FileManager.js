@@ -83,31 +83,6 @@ const findModule = (startDir, dep) => {
   return mod;
 };
 
-/**
- * Recursively finds template modules and executes a callback
- *
- * @param {string} srcDir - directory to search from
- * @param {Function} cb - callback to execute
- */
-const eachModule = (srcDir, callback) => {
-  let packageJson;
-  try {
-    packageJson = require(path.join(srcDir, 'package.json'));
-  } catch (err) {
-    console.error(err.message);
-    return;
-  }
-  const dependencies = packageJson.dependencies || {};
-  Object.keys(dependencies).forEach(moduleName => {
-    const mod = findModule(srcDir, moduleName);
-    if (mod && mod.hasConf) {
-      const modTemplateDir = path.join(mod.path, mod.templateDir);
-      callback(modTemplateDir, moduleName);
-      eachModule(mod.path, callback);
-    }
-  });
-};
-
 
 class FileManager {
 
@@ -118,6 +93,7 @@ class FileManager {
   constructor(config) {
     this.srcDir = config.srcDir;
     this.buildDir = config.buildDir;
+    this.packageJson = this.getPackageJson(config.packageJsonDir);
   }
 
   /**
@@ -158,6 +134,39 @@ class FileManager {
   }
 
   /**
+   * Get package.json as a required object
+   *
+   * @param {string} packageJsonDir - template source directory
+   * @return {object} - package.json, as an object
+   */
+   getPackageJson(packageJsonDir) {
+    try {
+      return require(path.join(packageJsonDir, 'package.json'));
+    } catch (err) {
+      console.error(`Error: Unable to find package.json in ${packageJsonDir}`);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Recursively finds template modules and executes a callback
+   *
+   * @param {string} srcDir - directory to search from
+   * @param {Function} callback - callback to execute
+   */
+  eachModule(srcDir, callback){
+    const dependencies = this.packageJson.dependencies || {};
+    Object.keys(dependencies).forEach(moduleName => {
+      const mod = findModule(srcDir, moduleName);
+      if (mod && mod.hasConf) {
+        const modTemplateDir = path.join(mod.path, mod.templateDir);
+        callback(modTemplateDir, moduleName);
+        this.eachModule(mod.path, callback);
+      }
+    });
+  }
+
+  /**
    * Gets source information on all template module dependencies
    *
    * @param {string} srcDir - template source directory
@@ -165,7 +174,7 @@ class FileManager {
    */
   getModules() {
     const modules = {};
-    eachModule(this.srcDir, (modulePath, moduleName) => {
+    this.eachModule(this.srcDir, (modulePath, moduleName) => {
       modules[moduleName] = {
         name: moduleName,
         filePath: modulePath
@@ -217,7 +226,7 @@ class FileManager {
     }
     const { filePath, relPath, moduleName } = file;
     const isModConf = filePath.indexOf('conf') >= 0 && moduleName;
-    const destPath = path.join(this.buildDir, relPath);
+    let destPath = path.join(this.buildDir, relPath);
     const srcFileExists = fs.existsSync(filePath);
     const destFileExists = fs.existsSync(destPath);
     if (isModConf && destFileExists) {
@@ -229,6 +238,12 @@ class FileManager {
     }
     const originPath = filePath.replace(this.srcDir, '');
     const destPathRelative = destPath.replace(this.srcDir, '');
+    const fileParts = path.parse(originPath);
+
+    // ensure .region files arrive in the base dest directory, not nested
+    if (fileParts.ext === '.region'){
+      destPath = path.join(this.buildDir, fileParts.base);
+    }
     console.log(colors.cyan.bold(`Copying ${originPath} to ${destPathRelative}`));
     fs.copySync(filePath, destPath);
     return true;

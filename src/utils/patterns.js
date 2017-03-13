@@ -20,33 +20,44 @@
  * and provides an interface for retrieving the appropriate set
  */
 
-const BASE_PATTERNS = [
-  '/assets/**',
-  '/blocks/**',
-  '/collections/**',
-  '/pages/**',
-  '/styles/**',
-  '/**.region',
-  '/template.conf'
-];
+const BASE_PATTERNS = {
+  assets:      '/assets/**',
+  blocks:      '/blocks/**',
+  collections: '/collections/**',
+  pages:       '/pages/**',
+  regions:     '/**/*.region',
+  scripts:     '/scripts/**',
+  styles:      '/styles/**',
+  conf:        '/template.conf'
+};
+const { values } = require('lodash/object');
 
 /**
  * Returns an array of glob patterns, based on default pattern set.
  * Can be modified with args for edge cases like legacy templates.
  *
- * @param  {Boolean} options.isLegacy - `true` for legacy, non-webpacked templates
- * @param  {Boolean} options.ignoreConf - if true, will not copy template.conf file
+ * @param  {Array} options.omit - keys (string) in BASE_PATTERNS to omit
  * @return {Array} glob patterns that will be copied
  */
-function getPatterns({ isLegacy, ignoreConf }) {
+function getPatterns({ omit }) {
 
-  let patterns = [].concat(BASE_PATTERNS);
+  // make a fresh copy for mutation
+  const patterns = Object.assign({}, BASE_PATTERNS);
 
-  if (isLegacy) {
-    patterns.push('/scripts/**');
+  // remove any types we want to exclude
+  if (omit && omit.length) {
+
+    omit.forEach( (omit) => {
+
+      // ensure the omission is a valid pattern type
+      if (patterns[ omit ]) {
+        delete patterns[ omit ];
+      }
+    });
   }
 
-  return patterns;
+  // flatten object into an array of glob patterns
+  return values(patterns);
 }
 
 module.exports = {
