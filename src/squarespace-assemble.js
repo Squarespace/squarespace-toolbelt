@@ -44,10 +44,9 @@ function configServer(options) {
 }
 
 function main(options) {
-
   const srcDir = options.directory || process.cwd();
   const buildDir = options.output || path.join(srcDir, 'build');
-  const packageJsonDir = path.resolve(process.cwd(), options.package) || process.cwd();
+  const packageJsonDir = (options.package) ? path.resolve(process.cwd(), options.package) : process.cwd();
   const omit = (options.omit && options.omit.split(',')) || [];
   const isLegacy = options.legacy || false;
   const server = configServer(options);
