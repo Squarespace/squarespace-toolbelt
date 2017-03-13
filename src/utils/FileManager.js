@@ -19,7 +19,6 @@
  * Low level file utilities for locating, collating,
  * copying and editing template source and modules
  */
-
 const fs = require('fs-extra');
 const del = require('del');
 const path = require('path');
@@ -141,7 +140,11 @@ class FileManager {
    */
    getPackageJson(packageJsonDir) {
     try {
-      return require(path.join(packageJsonDir, 'package.json'));
+      const packageJsonPath = path.join(packageJsonDir, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        return require(packageJsonPath);
+      }
+      return null;
     } catch (err) {
       console.error(`Error: Unable to find package.json in ${packageJsonDir}`);
       process.exit(1);
@@ -155,7 +158,8 @@ class FileManager {
    * @param {Function} callback - callback to execute
    */
   eachModule(srcDir, callback){
-    const dependencies = this.packageJson.dependencies || {};
+    const packageJson = this.getPackageJson(srcDir);
+    const dependencies = packageJson ? packageJson.dependencies : {};
     Object.keys(dependencies).forEach(moduleName => {
       const mod = findModule(srcDir, moduleName);
       if (mod && mod.hasConf) {
