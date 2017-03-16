@@ -25,7 +25,7 @@ const BASE_PATTERNS = {
   blocks:      '/blocks/**',
   collections: '/collections/**',
   pages:       '/pages/**',
-  regions:     '/**/*.region',
+  regions:     '{/*.region,/regions/**/*.region}',
   scripts:     '/scripts/**',
   styles:      '/styles/**',
   conf:        '/template.conf'
