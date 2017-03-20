@@ -249,7 +249,7 @@ class FileManager {
       destPath = path.join(this.buildDir, fileParts.base);
     }
     console.log(colors.cyan.bold(`Copying ${originPath} to ${destPathRelative}`));
-    fs.copySync(filePath, destPath);
+    fs.copySync(filePath, destPath, { dereference: true });
     return true;
   }
 
