@@ -127,7 +127,7 @@ class FileManager {
     });
     this.files = files;
     values(files).forEach((file) => {
-      cb.call(this, file);
+      cb.call(this, file, flags);
     });
     return files;
   }
@@ -220,8 +220,9 @@ class FileManager {
    * @param {string} file.filePath - absolute path of file
    * @param {string} file.relPath - relative path of file
    * @param {string} file.moduleName - if file is module, name of the module
+   * @param {object}  flags - a map of CLI options
    */
-  syncFile(file) {
+  syncFile(file, flags) {
     if (typeof file === 'string') {
       file = this.files[file];
       if (!file) {
@@ -233,8 +234,9 @@ class FileManager {
     let destPath = path.join(this.buildDir, relPath);
     const srcFileExists = fs.existsSync(filePath);
     const destFileExists = fs.existsSync(destPath);
+
     if (isModConf && destFileExists) {
-      this.updateConf(filePath, moduleName);
+      this.updateConf(filePath, moduleName, flags);
       return true;
     }
     if (!srcFileExists || !fs.lstatSync(filePath).isFile()) {
@@ -299,20 +301,26 @@ class FileManager {
    *
    * @param {string} confPath - path of conf file to merge into build
    * @param {string} [moduleName] - name of module (used for logs)
+   * @param {object} [flags] - a map of CLI options
    */
-  updateConf(confPath, moduleName = '') {
+  updateConf(confPath, moduleName = '', flags = {}) {
     let buildConf;
     const conf = fs.readJsonSync(confPath);
     const confBase = path.parse(confPath).base;
     const buildConfPath = this.getConfPath(confBase, this.buildDir);
+    const confDisplayName = confBase === 'template.conf' ? confBase : path.join('collections', confBase);
+
+    // do not copy stylesheets in template.conf, if styles is omitted
+    if (flags.omit && flags.omit.includes('styles') && ("stylesheets" in conf)){
+      console.log(colors.blue.bold(`Dropping stylesheets from ${confDisplayName} of ${moduleName} because of --omit flag`));
+      delete conf.stylesheets;
+    }
 
     try {
       buildConf = fs.readJsonSync(buildConfPath);
     } catch (err) {
       console.error('Oh no, there was an error: ' + err.message);
     }
-
-    const confDisplayName = confBase === 'template.conf' ? confBase : path.join('collections', confBase);
 
     if (!buildConf) {
       console.log('Oh no, couldn\'t find ' + confDisplayName + ' in build');
