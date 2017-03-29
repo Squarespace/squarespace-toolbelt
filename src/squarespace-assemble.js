@@ -101,7 +101,7 @@ Program
   .option('-o, --output <output>', 'Output directory for assembled files. Default is \'build\'')
   .option('-T, --trigger-reload [host:port]', 'Trigger Local Development Server to reload on each assemble.')
   .option('-m, --omit <type>', `Skip template components during assembly, comma separated (e.g. styles,blocks)`)
-  .option('-p, --package <directory> Directory containing package.json. Default is the current working directory.')
+  .option('-p, --package <directory>', 'Directory containing package.json. Default is the current working directory.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
   .parse(process.argv);
 
