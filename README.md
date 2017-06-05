@@ -23,7 +23,7 @@ In your package.json you can use Squarespace Toolbelt to automatically run build
         "watch":  "squarespace assemble -wT & webpack --watch",
         "server": "squarespace runserver -T",
         "start":  "squarespace setup && (npm run watch & npm run server)",
-        "deploy": "squarspace setup && squarespace deploy"
+        "deploy": "squarespace setup && squarespace deploy"
       }
       ...
     }
