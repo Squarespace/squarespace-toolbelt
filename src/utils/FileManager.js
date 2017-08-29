@@ -159,7 +159,7 @@ class FileManager {
    */
   eachModule(srcDir, callback){
     const packageJson = this.getPackageJson(srcDir);
-    const dependencies = packageJson ? packageJson.dependencies : {};
+    const dependencies = packageJson && packageJson.dependencies ? packageJson.dependencies : {};
     Object.keys(dependencies).forEach(moduleName => {
       const mod = findModule(srcDir, moduleName);
       if (mod && mod.hasConf) {
