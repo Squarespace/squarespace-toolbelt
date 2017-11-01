@@ -28,6 +28,7 @@ const BASE_PATTERNS = {
   regions:     '{/*.region,/regions/**/*.region}',
   scripts:     '/scripts/**',
   styles:      '/styles/**',
+  strings:      '/strings/**',
   conf:        '/template.conf'
 };
 const { values } = require('lodash/object');
