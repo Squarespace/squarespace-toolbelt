@@ -53,15 +53,16 @@ let repoUrl;
 
 function main(options) {
   const directory = options.directory || './build';
+  const force = options.force || false;
   const message = options.message || 'squarespace deploy ' + Moment().format('lll');
   const normalizedUrl = repoUrl.replace(/([^:])(\/\/+)/, '$1/')
     .replace(/^http:/, 'https:');
 
-  Deployment.deploy(directory, normalizedUrl, message, true);
+  Deployment.deploy(directory, normalizedUrl, message, true, force);
 
   if (options.watch) {
     Watcher.watchFolder(directory, WATCH_EXCL_PATTERNS, () => {
-      Deployment.deploy(directory, repoUrl, message, false);
+      Deployment.deploy(directory, repoUrl, message, false, force);
     });
   }
 }

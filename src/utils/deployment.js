@@ -222,11 +222,11 @@ const Deployment = {
    * @param {string} repoUrl - the git URL for the repo.
    * @return {Promise} a promise to return a git repo.
    */
-  pushBuild(repo, repoUrl) {
+  pushBuild(repo, repoUrl, options = {}) {
     console.log('Pushing build...');
     const remote = gitUrlToOriginName(repoUrl);
     return new Promise((resolve, reject) => {
-      repo.push([remote, 'master'], finishWithGitResult(repo, resolve, reject));
+      repo.push([remote, 'master'], options, finishWithGitResult(repo, resolve, reject));
     });
   },
 
@@ -282,12 +282,12 @@ const Deployment = {
    * @param {string} buildMessage- a commit message for the build.
    * @return {async object} a git repo.
    */
-  async commitBuild(repo, repoUrl, buildMessage) {
+  async commitBuild(repo, repoUrl, buildMessage, force) {
     try {
       await Deployment.addBuild(repo);
       await Deployment.makeBuildCommit(repo, buildMessage);
       await Deployment.pullRemote(repo, repoUrl);
-      await Deployment.pushBuild(repo, repoUrl);
+      await Deployment.pushBuild(repo, repoUrl, { force });
     } catch (error) {
       console.error('Failed to deploy build. ' +
         'Please ensure that your site is in dev mode.');
@@ -304,7 +304,7 @@ const Deployment = {
    * @param {string} buildMessage - a commit message for the build.
    * @param {boolean} ensureRemote - create remote if not already there.
    */
-  async deploy(folder, url, buildMessage, ensureRemote) {
+  async deploy(folder, url, buildMessage, ensureRemote, force) {
     const noCredsUrl = url.replace(/(\/\/).*?:.*?@/, '$1');
     console.log(`Deploying files in ${folder} to ${noCredsUrl}...`);
     let repo = await Deployment.ensureRepo(folder, url);
@@ -317,7 +317,7 @@ const Deployment = {
         throw new Error('No repo!');
       }
     }
-    repo = await Deployment.commitBuild(repo, url, buildMessage);
+    repo = await Deployment.commitBuild(repo, url, buildMessage, force);
     if (!repo) {
       throw new Error('No repo!');
     }
