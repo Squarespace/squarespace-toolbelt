@@ -104,6 +104,7 @@ Options:
     -d, --directory <directory>  Deploy from this directory. Default is 'build'
     -m, --message <message>      Deployment message. Default is 'sqs-deploy <date time>'
     -w, --watch                  Watch the build directory for changes and deploy automatically.
+    -f, --force                  Force deployment of build regardless of git history/conflicts.
 
 
 ### squarepace runserver URL [options]
