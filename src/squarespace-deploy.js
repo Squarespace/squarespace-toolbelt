@@ -77,7 +77,7 @@ Program
   .option('-d, --directory <directory>',
     'Deploy from this directory. Default is \'build\'')
   .option('-f, --force',
-    'Force deployment of build. Default is \'false\'')
+    'Force deployment of build. This will overwrite any git history in your site\'s /template.git repository. Default is \'false\'')
   .option('-m, --message <message>',
     'Deployment message. Default is \'squarespace deploy <date time>\'')
   .option('-w, --watch',
