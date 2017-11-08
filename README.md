@@ -104,6 +104,17 @@ Options:
     -d, --directory <directory>  Deploy from this directory. Default is 'build'
     -m, --message <message>      Deployment message. Default is 'sqs-deploy <date time>'
     -w, --watch                  Watch the build directory for changes and deploy automatically.
+    -f, --force                  Force deployment of build. This will overwrite any git history in your site's /template.git repository.
+
+#### Troubleshooting
+
+If you are attempting to deploy a template other than the one cloned from your site's `/template.git` repository, you will encounter the following error:
+
+```
+fatal: refusing to merge unrelated histories
+```
+
+To solve this, you can use `squarespace deploy --force`. Beware that this will overwrite any git history in your site's `/template.git` repository.
 
 
 ### squarepace runserver URL [options]

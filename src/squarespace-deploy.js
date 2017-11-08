@@ -53,15 +53,18 @@ let repoUrl;
 
 function main(options) {
   const directory = options.directory || './build';
+  const flags = {};
   const message = options.message || 'squarespace deploy ' + Moment().format('lll');
   const normalizedUrl = repoUrl.replace(/([^:])(\/\/+)/, '$1/')
     .replace(/^http:/, 'https:');
 
-  Deployment.deploy(directory, normalizedUrl, message, true);
+  if (options.force) flags.force = true;
+
+  Deployment.deploy(directory, normalizedUrl, message, true, flags);
 
   if (options.watch) {
     Watcher.watchFolder(directory, WATCH_EXCL_PATTERNS, () => {
-      Deployment.deploy(directory, repoUrl, message, false);
+      Deployment.deploy(directory, repoUrl, message, false, flags);
     });
   }
 }
@@ -73,6 +76,8 @@ Program
   })
   .option('-d, --directory <directory>',
     'Deploy from this directory. Default is \'build\'')
+  .option('-f, --force',
+    'Force deployment of build. This will overwrite any git history in your site\'s /template.git repository. Default is \'false\'')
   .option('-m, --message <message>',
     'Deployment message. Default is \'squarespace deploy <date time>\'')
   .option('-w, --watch',

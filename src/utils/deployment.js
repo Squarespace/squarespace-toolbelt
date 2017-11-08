@@ -220,13 +220,14 @@ const Deployment = {
    * Pushes the current build to the remote specified by the repo's URL.
    * @param {object} repo - a git repo.
    * @param {string} repoUrl - the git URL for the repo.
+   * @param {object} flags - a key/value pair of flags to use during deploy.
    * @return {Promise} a promise to return a git repo.
    */
-  pushBuild(repo, repoUrl) {
+  pushBuild(repo, repoUrl, flags) {
     console.log('Pushing build...');
     const remote = gitUrlToOriginName(repoUrl);
     return new Promise((resolve, reject) => {
-      repo.push([remote, 'master'], finishWithGitResult(repo, resolve, reject));
+      repo.push([remote, 'master'], flags, finishWithGitResult(repo, resolve, reject));
     });
   },
 
@@ -279,15 +280,18 @@ const Deployment = {
    * Creates a build commit and pushes it to the repo.
    * @param {object} repo - a git repo.
    * @param {string} repoUrl - the git URL for the repo.
-   * @param {string} buildMessage- a commit message for the build.
+   * @param {string} buildMessage - a commit message for the build.
+   * @param {object} flags - a key/value pair of flags to use during deploy.
    * @return {async object} a git repo.
    */
-  async commitBuild(repo, repoUrl, buildMessage) {
+  async commitBuild(repo, repoUrl, buildMessage, flags) {
     try {
       await Deployment.addBuild(repo);
       await Deployment.makeBuildCommit(repo, buildMessage);
-      await Deployment.pullRemote(repo, repoUrl);
-      await Deployment.pushBuild(repo, repoUrl);
+      if (!flags.force) {
+        await Deployment.pullRemote(repo, repoUrl);
+      }
+      await Deployment.pushBuild(repo, repoUrl, flags);
     } catch (error) {
       console.error('Failed to deploy build. ' +
         'Please ensure that your site is in dev mode.');
@@ -303,8 +307,9 @@ const Deployment = {
    * @param {string} url - the git URL for the repo.
    * @param {string} buildMessage - a commit message for the build.
    * @param {boolean} ensureRemote - create remote if not already there.
+   * @param {object} flags - a key/value pair of flags to use during deploy.
    */
-  async deploy(folder, url, buildMessage, ensureRemote) {
+  async deploy(folder, url, buildMessage, ensureRemote, flags = {}) {
     const noCredsUrl = url.replace(/(\/\/).*?:.*?@/, '$1');
     console.log(`Deploying files in ${folder} to ${noCredsUrl}...`);
     let repo = await Deployment.ensureRepo(folder, url);
@@ -317,7 +322,7 @@ const Deployment = {
         throw new Error('No repo!');
       }
     }
-    repo = await Deployment.commitBuild(repo, url, buildMessage);
+    repo = await Deployment.commitBuild(repo, url, buildMessage, flags);
     if (!repo) {
       throw new Error('No repo!');
     }
