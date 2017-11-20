@@ -197,9 +197,9 @@ class FileManager {
    */
   getRelativePath(filePath, dir) {
     if (dir) {
-      return filePath.replace(dir, '');
+      return path.relative(dir, filePath);
     }
-    return filePath.replace(this.srcDir, '');
+    return path.relative(this.srcDir, filePath);
   }
 
   /**
@@ -242,8 +242,8 @@ class FileManager {
     if (!srcFileExists || !fs.lstatSync(filePath).isFile()) {
       return false;
     }
-    const originPath = filePath.replace(this.srcDir, '');
-    const destPathRelative = destPath.replace(this.srcDir, '');
+    const originPath = path.relative(this.srcDir, filePath);
+    const destPathRelative = path.relative(this.srcDir, destPath);
     const fileParts = path.parse(originPath);
 
     // ensure .region files arrive in the base dest directory, not nested

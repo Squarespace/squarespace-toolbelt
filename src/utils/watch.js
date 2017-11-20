@@ -80,7 +80,7 @@ const WatchExports = {
      * @param {string} filePath - the absolute path of the file that was removed
      */
     function handleDelete(filePath) {
-      const relPath = filePath.replace(manager.srcDir, '');
+      const relPath = path.relative(manager.srcDir, filePath);
       const dest = manager.buildDir + relPath;
       console.log(colors.red.bold('Removing %s'), dest);
       fs.removeSync(dest);
