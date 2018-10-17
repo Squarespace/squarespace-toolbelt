@@ -22,15 +22,16 @@
 import homedir from 'homedir';
 import path from 'path';
 
-export const SQUARESPACE_DOMAIN = 'squarespace.com';
-export const OAUTH_DOMAIN = `https://oauth.${SQUARESPACE_DOMAIN}`;
-export const LOGIN_URL = `https://www.${SQUARESPACE_DOMAIN}/api/auth/Login`;
-export const WEBSITES_URL = `${OAUTH_DOMAIN}/api/account/GetManagedWebsites`;
-export const SIGNUP_URL = `${OAUTH_DOMAIN}/api/auth/QueueSignup`;
-export const SIGNUP_KEY_URL = `${OAUTH_DOMAIN}/api/auth/SignupKey`;
-export const SIGNUP_POLL = `${OAUTH_DOMAIN}/api/jobs/signup`;
-export const SIGNUP_JOB_COMPLETE = 3;
-export const SIGNUP_JOB_PENDING = [1, 2, 6];
+
+export const BASE_URL = `https://www.squarespace.com`;
+
+export const LOGIN_URL = `${BASE_URL}/api/auth/Login`;
+export const WEBSITES_URL = `${BASE_URL}/api/account/GetManagedWebsites`;
+export const CREATE_SITE_URL = `${BASE_URL}/api/create-website/enqueue`;
+
+export const SIGNUP_JOB_COMPLETE = 2;
+export const SIGNUP_JOB_PENDING = 1;
+export const WEBSITE_TYPE = 1;
 
 export const GLOBAL_SETTINGS_FILE = '.squarespace';
 export const GLOBAL_SETTINGS_PATH = path.resolve(homedir() || '', GLOBAL_SETTINGS_FILE);
