@@ -79,8 +79,7 @@ export function setup(folder) {
     if (answers.createSite === Questions.createSite.choices[1]) {
       // Create a new site
       return SiteManager.createSite(getCloneId(folder))
-        .then(websiteId => {
-          const siteUrl = `https://${websiteId}.${Constants.SQUARESPACE_DOMAIN}`;
+        .then(siteUrl => {
           console.log('Success, your new site is ready at', siteUrl);
           return { siteUrl };
         });
@@ -117,5 +116,3 @@ export function getSiteUrl(folder) {
   const npmrc = npmrcio.readNpmrcSync(npmrcPath);
   return npmrc && npmrc[Constants.Keys.SITE_URL];
 }
-
-

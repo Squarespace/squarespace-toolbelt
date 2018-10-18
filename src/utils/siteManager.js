@@ -65,19 +65,24 @@ function readSettings() {
 }
 
 /* generic function to initiate an http request, and return a promise */
-function requestJson(method, url, form = {}, headers = {}) {
+function requestJson({method, url, body, isJsonRequest = false, headers = {}}) {
   function doRequest() {
-    return rp({
-      method: method,
+    let request = {
+      method,
       uri: url + `?crumb=${Cookies.getCrumb()}`,
       headers: Object.assign({
         'User-Agent': Constants.USER_AGENT,
         'cookie': Cookies.serialize()
       }, headers),
       resolveWithFullResponse: true,
-      json: true,
-      form
-    }).then(res => {
+      json: true
+    };
+    if (isJsonRequest) {
+      request.body = body;
+    } else {
+      request.form = body;
+    }
+    return rp(request).then(res => {
       Cookies.setCookies(res);
       return res;
     });
@@ -111,7 +116,10 @@ function delay(timeout, value) {
  * @return {promise} A promise that resolves to an array of website URLs.
  */
 export function getWebsites() {
-  return requestJson('GET', Constants.WEBSITES_URL).then(
+  return requestJson({
+    method: 'GET',
+    url: Constants.WEBSITES_URL
+  }).then(
     res => res.body.websites.map(site=>site.baseUrl)
   );
 }
@@ -129,14 +137,16 @@ export function login(acctData = null) {
   const checkAuthToken = getWebsites;
 
   function sendLoginRequest(params) {
-    return requestJson('POST', Constants.LOGIN_URL, {
-      email: params.email,
-      password: params.password,
-      isClient: true,
-      remember: true,
-      includeWebsiteList: true
-    }, {
-      'Content-Type': 'application/x-www-form-urlencoded'
+    return requestJson({
+      method: 'POST',
+      url: Constants.LOGIN_URL,
+      body: {
+        email: params.email,
+        password: params.password,
+        isClient: true,
+        remember: true,
+        includeWebsiteList: true
+      }
     });
   }
 
@@ -187,98 +197,45 @@ export function login(acctData = null) {
  * @param {string} cloneFromId - the website identifier of the parent template
  * from which the new template will be cloned.
  * @return {promise} an Promise that resolves to a string containing the new
- * website identifier.
+ * website url.
  */
 export function createSite(cloneFromId) {
-
-  function handleFormErrors(body) {
-    let errorMsg = '';
-    if (body.errors) {
-      Object.keys(body.errors).forEach(function(key) {
-        const passOrEmail = key === 'password' || key === 'email';
-        const passwordOk = body.errors[key].indexOf('between 6 and 40 characters') === -1;
-        if (passOrEmail && passwordOk) {
-          errorMsg += 'Invalid email or password.\n';
-        } else {
-          errorMsg += `${body.errors[key]}\n`;
-        }
-      });
-    } else if (body.error) {
-      errorMsg += body.error + '\n';
-    }
-    if (errorMsg !== '') {
-      throw(errorMsg);
-    }
-  }
-
-  function finalize([loginResult, pollResult]) {
-    if (!loginResult) {
-      console.error("Failed to login after creating site. Please try logging in again.");
-      process.exit(1);
-    }
+  function finalize(pollResult) {
     return Promise.resolve(pollResult);
   }
 
-  function pollSignup(jobId) {
-    return requestJson('GET', `${Constants.SIGNUP_POLL}/${jobId}`)
-      .then(res => {
+  function pollSignup(statusUrl) {
+    return requestJson({
+      method: 'GET',
+      url: `${Constants.BASE_URL}${statusUrl}`,
+      isJsonRequest: true
+    }).then(res => {
         const job = res.body;
-        if (job === null || Constants.SIGNUP_JOB_PENDING.indexOf(job.status) >= 0 ) {
-          return delay(1000, jobId).then(pollSignup);
+        if (job === null || Constants.SIGNUP_JOB_PENDING === job.status) {
+          return delay(1000, statusUrl).then(pollSignup);
         } else if (job.status === Constants.SIGNUP_JOB_COMPLETE) {
-          return job.data.createdWebsiteIdentifier;
+          return job.siteUrl;
         } else {
           throw('Error while creating new site. Please try again.');
         }
       });
   }
 
-  function doCreateSite(acctData) {
-    const payload = Object.assign({
-      cloneIdentifier: cloneFromId,
-      page: 'preview',
-      developer: true
-    }, acctData);
-
-    return requestJson('POST', `${Constants.SIGNUP_URL}`, payload)
-      .then(res => {
-        handleFormErrors(res.body);
-        return [acctData, res.body.id];
-      });
+  function doCreateSite() {
+    console.log("Creating your new Squarespace website...");
+    return requestJson({
+      method: 'POST',
+      url: Constants.CREATE_SITE_URL,
+      isJsonRequest: true,
+      body: {
+        seed: cloneFromId,
+        websiteType: Constants.WEBSITE_TYPE
+      }
+    }).then(res => res.body.statusUrl);
   }
 
-  function getSignupKey(acctData) {
-    return requestJson('POST', Constants.SIGNUP_KEY_URL).then(data =>
-      Object.assign(acctData, {SK1: data.body.key})
-    );
-  }
-
-  function loginOrSignup() {
-    return prompt([Questions.loginOrSignup])
-      .then(answers => {
-        const newSignup = answers.loginOrSignup === Questions.loginOrSignup.choices[1];
-        let prompts = [
-          Questions.email,
-          Questions.password
-        ];
-
-        if (newSignup) {
-          prompts = [
-            Questions.firstName,
-            Questions.lastName
-          ].concat(prompts);
-        }
-
-        return prompt(prompts).then(answers => {
-          console.log("Creating your new Squarespace website...");
-          return Object.assign(answers, {isNewAccount: newSignup});
-        });
-      });
-  }
-
-  return loginOrSignup()
-    .then(getSignupKey)
+  return login()
     .then(doCreateSite)
-    .then(([acctData, jobId])=>Promise.all([login(acctData), pollSignup(jobId)]))
+    .then(pollSignup)
     .then(finalize);
 }
