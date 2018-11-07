@@ -9,7 +9,7 @@ Utilities for building and maintaining Squarespace templates
 
 ## Usage
 
-In your package.json you can use Squarespace Toolbelt to automatically run build tasks on Squarespace tempalates. Example:
+In your package.json you can use Squarespace Toolbelt to automatically run build tasks on Squarespace templates. Example:
 
     {
       "name": "your-squarespace-template",
