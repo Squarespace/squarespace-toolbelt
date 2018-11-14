@@ -60,7 +60,8 @@ function main(options) {
 
   if (options.force) flags.force = true;
 
-  Deployment.deploy(directory, normalizedUrl, message, true, flags);
+  Deployment.deploy(directory, normalizedUrl, message, true, flags)
+    .catch(() => process.exit(1));
 
   if (options.watch) {
     Watcher.watchFolder(directory, WATCH_EXCL_PATTERNS, () => {
