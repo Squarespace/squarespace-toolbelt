@@ -160,6 +160,8 @@ export function login(acctData = null) {
   function handleLoginError(e) {
     if (e.statusCode === 401) {
       throw("Bad username or password");
+    } else if (e.statusCode === 404) {
+      throw("This version of toolbelt is incompatible, please update to the latest version.");
     } else {
       throw("Unexpected Error:", e);
     }
