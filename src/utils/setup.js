@@ -27,30 +27,21 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 
 import npmrcio from './npmrcio';
-import * as SiteManager from './siteManager';
 import * as Constants from './constants';
 import * as Questions from './questions';
+
+import { exec } from 'child_process';
+
 
 // HELPERS -----------------------------------------------------------------------
 
 /* if prompt is aborted via sigint, exit with nonzero code */
 function prompt() {
   let result = inquirer.prompt.apply(inquirer.prompt, arguments);
-  result.ui.rl.on('SIGINT', ()=>{process.exit(1);});
+  result.ui.rl.on('SIGINT', () => {
+    process.exit(1);
+  });
   return result;
-}
-
-/* Get's templateId of clonee website from package.json */
-function getCloneId(folder) {
-  let cloneFromId = Constants.BASE_TEMPLATE;
-  try {
-    const pjson = require(path.join(folder, 'package.json'));
-    cloneFromId = pjson.squarespace.templateId;
-  } catch(e) {
-    console.warn("Warn: `squarespace.templateId` not present in package.json.",
-      "Using `base-template` to clone the new site.");
-  }
-  return cloneFromId;
 }
 
 // EXPORTS -----------------------------------------------------------------------
@@ -66,7 +57,7 @@ export function setup(folder) {
 
   if (npmrc && npmrc[Constants.Keys.SITE_URL]) {
     console.log(`Using site url: ${npmrc[Constants.Keys.SITE_URL]}\n` +
-    `To change this please edit the .npmrc file in "${folder}"`);
+      `To change this please edit the .npmrc file in "${folder}"`);
     process.exit(0);
   }
 
@@ -74,36 +65,42 @@ export function setup(folder) {
 
   npmrc = npmrc || {};
 
-  prompt([Questions.createSite])
-  .then(answers => {
-    if (answers.createSite === Questions.createSite.choices[1]) {
-      // Create a new site
-      return SiteManager.createSite(getCloneId(folder))
-        .then(siteUrl => {
-          console.log('Success, your new site is ready at', siteUrl);
-          return { siteUrl };
-        });
-    } else {
-      // Use existing site
-      return SiteManager.login()
-        .then(SiteManager.getWebsites)
-        .then(sites => {
-          const question = Object.assign(Questions.chooseSite, {choices: sites});
-          return prompt([question]);
-        });
+  exec(`cd ${folder} && git config --get remote.origin.url`, (err, stdout) => {
+    if (err) {
+      throw err;
     }
-  })
-  .then(answers => {
-    if (!answers.siteUrl) {
-      process.exit(1);
-    }
-    npmrc[Constants.Keys.SITE_URL] = answers.siteUrl;
-    mkdirp.sync(folder);
-    npmrcio.writeNpmrcSync(npmrc, npmrcPath);
-  })
-  .catch(error => {
-    console.error("ERROR:", error);
-    process.exit(1);
+    const gitRemoteUrl = stdout.trim().replace(/\/template\.git/, '');
+
+    console.log(`Found git remote of [${gitRemoteUrl}].`);
+    prompt([Questions.useCurrentGitRemote])
+      .then(answers => {
+        if (answers.useCurrentGitRemote === Questions.useCurrentGitRemote.choices[0]) {
+          return { siteUrl: gitRemoteUrl };
+        } else {
+          // Use existing site
+          return prompt(Questions.enterSiteUrlManually)
+            .then(answers => {
+              if (answers.siteUrl) {
+                return { siteUrl: answers.siteUrl };
+              } else {
+                throw Error("Must enter a site URL, e.g. https://mysite.squarespace.com");
+              }
+            });
+        }
+      })
+      .then(answers => {
+        if (!answers.siteUrl) {
+          process.exit(1);
+        }
+        npmrc[Constants.Keys.SITE_URL] = answers.siteUrl;
+        mkdirp.sync(folder);
+        npmrcio.writeNpmrcSync(npmrc, npmrcPath);
+        console.log(`Successfully set up .npmrc with site url ${answers.siteUrl}`);
+      })
+      .catch(error => {
+        console.error("ERROR:", error);
+        process.exit(1);
+      });
   });
 }
 

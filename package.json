@@ -7,6 +7,7 @@
   "engines": {
     "node": ">= 0.12.x"
   },
+  "type": "module",
   "bin": {
     "squarespace": "./build/squarespace.js"
   },

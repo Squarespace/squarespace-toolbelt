@@ -19,33 +19,8 @@
  * Top level constants used throughout squarespace toolbelt.
  */
 
-import homedir from 'homedir';
-import path from 'path';
-
-
-export const BASE_URL = `https://www.squarespace.com`;
-
-export const LOGIN_URL = `${BASE_URL}/api/auth/Login`;
-export const WEBSITES_URL = `${BASE_URL}/api/account/GetManagedWebsites`;
-export const CREATE_SITE_URL = `${BASE_URL}/api/create-website/enqueue`;
-
-export const SIGNUP_JOB_COMPLETE = 2;
-export const SIGNUP_JOB_PENDING = 1;
-export const WEBSITE_TYPE = 1;
-
-export const GLOBAL_SETTINGS_FILE = '.squarespace';
-export const GLOBAL_SETTINGS_PATH = path.resolve(homedir() || '', GLOBAL_SETTINGS_FILE);
 export const NPMRC_FILE = '.npmrc';
 
-export const USER_AGENT = 'Squarespace Toolbelt (Squarespace)';
-export const BASE_TEMPLATE = 'base-template';
-
 export const Keys = {
-  SITE_URL: 'sqs_site_url',
-  AUTH_TOKEN: 'authToken'
-};
-
-export const ProcessChain = {
-  CONTINUE: 0,
-  HALT: 1
+  SITE_URL: 'sqs_site_url'
 };
