@@ -196,7 +196,11 @@ const Deployment = {
     console.log('Committing build...');
     return new Promise((resolve, reject) => {
       repo.commit(message, (err) => {
-        resolve(repo);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(repo);
+        }
       });
     });
   },
