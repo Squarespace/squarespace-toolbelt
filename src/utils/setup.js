@@ -29,9 +29,7 @@ import path from 'path';
 import npmrcio from './npmrcio';
 import * as Constants from './constants';
 import * as Questions from './questions';
-
-import { exec } from 'child_process';
-
+import * as GitConfig from 'gitconfig';
 
 // HELPERS -----------------------------------------------------------------------
 
@@ -64,44 +62,43 @@ export function setup(folder) {
   // Setup required
 
   npmrc = npmrc || {};
+  GitConfig.get('remote.origin.url', {location: 'local'})
+    .then(gitRemoteUrl => {
 
-  exec(`cd ${folder} && git config --get remote.origin.url`, (err, stdout) => {
-    if (err) {
-      throw err;
-    }
-    const gitRemoteUrl = stdout.trim().replace(/\/template\.git/, '');
+      const siteUrl = gitRemoteUrl ? gitRemoteUrl.trim().replace(/\/template\.git/, '') : '';
 
-    console.log(`Found git remote of [${gitRemoteUrl}].`);
-    prompt([Questions.useCurrentGitRemote])
-      .then(answers => {
-        if (answers.useCurrentGitRemote === Questions.useCurrentGitRemote.choices[0]) {
-          return { siteUrl: gitRemoteUrl };
-        } else {
-          // Use existing site
-          return prompt(Questions.enterSiteUrlManually)
-            .then(answers => {
-              if (answers.siteUrl) {
-                return { siteUrl: answers.siteUrl };
-              } else {
-                throw Error("Must enter a site URL, e.g. https://mysite.squarespace.com");
-              }
-            });
-        }
-      })
-      .then(answers => {
-        if (!answers.siteUrl) {
+      console.log(`Found git remote of [${siteUrl}].`);
+      prompt([Questions.useCurrentGitRemote])
+        .then(answers => {
+          if (answers.useCurrentGitRemote === Questions.useCurrentGitRemote.choices[0]) {
+            return {siteUrl};
+          } else {
+            // Use existing site, specified manually by the user
+            return prompt(Questions.enterSiteUrlManually)
+              .then(answers => {
+                if (answers.siteUrl) {
+                  return {siteUrl: answers.siteUrl};
+                } else {
+                  throw Error("Must enter a site URL, e.g. https://mysite.squarespace.com");
+                }
+              });
+          }
+        })
+        .then(answers => {
+          if (!answers.siteUrl) {
+            console.error("No site URL provided, exiting.");
+            process.exit(1);
+          }
+          npmrc[Constants.Keys.SITE_URL] = answers.siteUrl;
+          mkdirp.sync(folder);
+          npmrcio.writeNpmrcSync(npmrc, npmrcPath);
+          console.log(`Successfully set up .npmrc with site url ${answers.siteUrl}`);
+        })
+        .catch(error => {
+          console.error("ERROR:", error);
           process.exit(1);
-        }
-        npmrc[Constants.Keys.SITE_URL] = answers.siteUrl;
-        mkdirp.sync(folder);
-        npmrcio.writeNpmrcSync(npmrc, npmrcPath);
-        console.log(`Successfully set up .npmrc with site url ${answers.siteUrl}`);
-      })
-      .catch(error => {
-        console.error("ERROR:", error);
-        process.exit(1);
-      });
-  });
+        });
+    });
 }
 
 /**
