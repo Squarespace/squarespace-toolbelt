@@ -19,28 +19,16 @@
  * A collection of prompts to be used with inquirer.
  */
 
-export const email =  {
+export const enterSiteUrlManually =  {
   type: 'input',
-  name: 'email',
-  message: 'What\'s your email address?'
-};
-
-export const password = {
-  type: 'password',
-  name: 'password',
-  message: 'Password'
-};
-
-export const createSite = {
-  type: 'list',
-  name: 'createSite',
-  choices: ['Use an existing website', 'Create a new website'],
-  default: 0,
-  message: 'Would you like to create a new site or start with an existing one?'
-};
-
-export const chooseSite = {
-  type: 'list',
   name: 'siteUrl',
-  message: 'Which website would you like to use?'
+  message: 'Please enter your target site URL (e.g. https://mysite.squarespace.com):'
+};
+
+export const useCurrentGitRemote = {
+  type: 'list',
+  name: 'useCurrentGitRemote',
+  choices: ['Use git remote', 'Specify manually'],
+  default: 0,
+  message: 'Would you like to use the above URL or specify one manually?'
 };
