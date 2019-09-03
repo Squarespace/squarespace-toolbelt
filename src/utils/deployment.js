@@ -195,7 +195,7 @@ const Deployment = {
   makeBuildCommit(repo, message) {
     console.log('Committing build...');
     return new Promise((resolve, reject) => {
-      repo.commit(message, (err) => {
+      repo.commit(message, {'allow-empty': true}, (err) => {
         if (err) {
           reject(err);
         } else {
