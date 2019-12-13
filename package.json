@@ -5,7 +5,7 @@
   "description": "Utilities for building and maintaining Squarespace templates",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">= 6"
+    "node": ">= 8"
   },
   "type": "commonjs",
   "bin": {
