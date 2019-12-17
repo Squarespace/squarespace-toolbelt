@@ -1,13 +1,13 @@
 {
   "name": "@squarespace/toolbelt",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "author": "Squarespace, Inc.",
   "description": "Utilities for building and maintaining Squarespace templates",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">= 6"
+    "node": ">= 8"
   },
-  "type": "module",
+  "type": "commonjs",
   "bin": {
     "squarespace": "./build/squarespace.js"
   },
