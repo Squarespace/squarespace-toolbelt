@@ -23,6 +23,7 @@ const git = require('git-cli');
 const path = require('path');
 const fs = require('fs-extra');
 const URL = require('url-parse');
+const { spawn } = require('child_process');
 
 /**
  * Utility to resolve git async action, throwing error if needed.
@@ -281,6 +282,34 @@ const Deployment = {
   },
 
   /**
+   * Set a larger than default (1mb) maximum http post chunk size
+   * https://git-scm.com/docs/git-config#Documentation/git-config.txt-httppostBuffer
+   * This is a mitigation to help support large repos by avoiding many small multipart encoded http requests
+   *
+   * @param {string} folder - path to a folder containing the .git folder.
+   *
+   * @returns {Promise<void>}
+   */
+  ensureHttpConfig(folder) {
+    return new Promise((resolve, reject) => {
+      const bufferSize = '157286400'; // 157mb has been tested internally to resolve git push hanging
+      const setHttpConfig = spawn(
+        'git',
+        ['config', '--local', 'http.postBuffer', bufferSize],
+        { cwd: folder }
+      );
+
+      setHttpConfig.on('close', (code) => {
+        if(code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Exited with code ${code}`));
+        }
+      });
+    });
+  },
+
+  /**
    * Creates a build commit and pushes it to the repo.
    * @param {object} repo - a git repo.
    * @param {string} repoUrl - the git URL for the repo.
@@ -326,6 +355,13 @@ const Deployment = {
         throw new Error('No repo!');
       }
     }
+
+    try {
+      await Deployment.ensureHttpConfig(folder);
+    } catch (e) {
+      // This is a preventive measure, if it fails nothing should fatally break
+    }
+
     repo = await Deployment.commitBuild(repo, url, buildMessage, flags);
     if (!repo) {
       throw new Error('No repo!');
