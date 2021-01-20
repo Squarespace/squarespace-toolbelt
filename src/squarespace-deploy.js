@@ -53,7 +53,9 @@ let repoUrl;
 
 function main(options) {
   const directory = options.directory || './build';
-  const flags = {};
+  const flags = {
+    postBufferSize: options.postBufferSize || '157286400' // 157mb has been tested internally to resolve git push hangs
+  };
   const message = options.message || 'squarespace deploy ' + Moment().format('lll');
   const normalizedUrl = repoUrl.replace(/([^:])(\/\/+)/, '$1/')
     .replace(/^http:/, 'https:');
@@ -83,6 +85,7 @@ Program
     'Deployment message. Default is \'squarespace deploy <date time>\'')
   .option('-w, --watch',
     'Watch the build directory for changes and deploy automatically.')
+  .option('--postBufferSize <size>', 'Set custom git http.postBuffer size. Default is 157286400')
   .parse(process.argv);
 
 if (!repoUrl) {
