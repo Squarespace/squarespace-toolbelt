@@ -287,17 +287,19 @@ const Deployment = {
    * This is a mitigation to help support large repos by avoiding many small multipart encoded http requests
    *
    * @param {string} folder - path to a folder containing the .git folder.
+   * @param {object} flags - a key/value pair of flags to use during deploy.
    *
    * @returns {Promise<void>}
    */
-  ensureHttpConfig(folder) {
+  ensureHttpConfig(folder, flags) {
     return new Promise((resolve, reject) => {
-      const bufferSize = '157286400'; // 157mb has been tested internally to resolve git push hanging
       const setHttpConfig = spawn(
         'git',
-        ['config', '--local', 'http.postBuffer', bufferSize],
+        ['config', '--local', 'http.postBuffer', flags.postBufferSize],
         { cwd: folder }
       );
+
+      delete flags.postBufferSize; // Delete flag so it is not used in the 'git deploy' command
 
       setHttpConfig.on('close', (code) => {
         if(code === 0) {
@@ -357,7 +359,7 @@ const Deployment = {
     }
 
     try {
-      await Deployment.ensureHttpConfig(folder);
+      await Deployment.ensureHttpConfig(folder, flags);
     } catch (e) {
       // This is a preventive measure, if it fails nothing should fatally break
     }
