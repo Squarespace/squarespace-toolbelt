@@ -57,11 +57,11 @@ describe('merge', function() {
     };
     const result = {
       "stylesheets": [
+        "gallery.less",
         "blog.less",
         "site.less",
         "util.less",
-        "tweak.less",
-        "gallery.less"
+        "tweak.less"
       ]
     };
     merge(a, b, 0).should.deep.equal(result);
@@ -90,12 +90,12 @@ describe('merge', function() {
     const result = {
       "navigations": [
         {
-          "name": "main-nav",
-          "title": "Main Navigation"
-        },
-        {
           "name": "secondary-nav",
           "title": "Secondary Navigation"
+        },
+        {
+          "name": "main-nav",
+          "title": "Main Navigation"
         }
       ]
     };
@@ -153,7 +153,7 @@ describe('merge', function() {
       "layouts": {
         "default": {
           "name": "Default",
-          "regions": [ "site", "header", "footer" ]
+          "regions": [ "footer", "header", "site" ]
         }
       }
     };
