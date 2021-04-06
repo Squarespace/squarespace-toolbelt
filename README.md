@@ -82,6 +82,7 @@ Options:
     -o, --output <output>             Output directory for assembled files. Default is 'build'
     -T, --trigger-reload [host:port]  Trigger Local Development Server to reload on each assemble.
     -l, --legacy                      Copies scripts directory for older templates with squarespace:script tags.
+    -a, --after <command>             Run a command after the build has completed.
 
 #### Using `--trigger-reload`:
 
