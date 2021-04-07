@@ -31,6 +31,8 @@ const http = require('http');
 const Program = require('commander');
 const FileManager = require('./utils/FileManager');
 const Watcher = require('./utils/watch');
+const { exec } = require('child_process');
+const colors = require('colors');
 
 function configServer(options) {
   let server = 'http://localhost:9000';
@@ -58,6 +60,22 @@ function main(options) {
   });
 
   function reload() {
+    if (options.after) {
+      exec(options.after, (err, stdout, stderr) => {
+        if (err) {
+          console.error(colors.red.bold('Error executing after build command:\n\n', err.toString()));
+        } else {
+          if (stdout) {
+            console.log(stdout);
+          }
+
+          if (stderr) {
+            console.error(colors.red.bold(stderr));
+          }
+        }
+      });
+    }
+
     if (options.triggerReload) {
       http.get(server + '/local-api/reload/trigger')
           .on('error', ()=>{});
@@ -79,18 +97,17 @@ function main(options) {
     console.log('Destination directory cleaned');
   }
 
+  manager.syncAllFiles({ omit });
+  reload();
+
   // --watch
   if (options.watch) {
-    manager.syncAllFiles({ omit });
     Watcher.watchAndCollect({
       manager,
       rootDir: srcDir,
       flags: { omit },
       callback: reload
     });
-  } else {
-    manager.syncAllFiles({ omit });
-    reload();
   }
 }
 
@@ -103,6 +120,7 @@ Program
   .option('-m, --omit <type>', `Skip template components during assembly, comma separated (e.g. styles,blocks)`)
   .option('-p, --package <directory>', 'Directory containing package.json. Default is the current working directory.')
   .option('-l, --legacy', 'Copies scripts directory for older templates with squarespace:script tags.')
+  .option('-a, --after <command>', 'Run a command after the build has completed.')
   .parse(process.argv);
 
 main(Program);
