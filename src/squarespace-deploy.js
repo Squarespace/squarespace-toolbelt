@@ -65,11 +65,11 @@ function main(options) {
       exec(options.after, (err, stdout, stderr) => {
         if (err) {
           console.error(colors.red.bold('Error executing after deploy command:\n\n', err.toString()));
+          process.exit(err.code);
         } else {
           if (stdout) {
             console.log(stdout);
           }
-
           if (stderr) {
             console.error(colors.red.bold(stderr));
           }
