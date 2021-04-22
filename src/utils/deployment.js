@@ -212,11 +212,11 @@ const Deployment = {
    * @param {string} repoUrl - the git URL for the repo.
    * @return {Promise} a promise to return a git repo.
    */
-  pullRemote(repo, repoUrl) {
+  pullRemote(repo, repoUrl, flags = { 'strategy': 'ours' }) {
     console.log('Pulling from remote...');
     const remote = gitUrlToOriginName(repoUrl);
     return new Promise((resolve, reject) => {
-      repo.pull([remote, 'master'], {'strategy': 'ours' },
+      repo.pull([remote, 'master'], flags,
         finishWithGitResult(repo, resolve, reject));
     });
   },
@@ -233,6 +233,24 @@ const Deployment = {
     const remote = gitUrlToOriginName(repoUrl);
     return new Promise((resolve, reject) => {
       repo.push([remote, 'master'], flags, finishWithGitResult(repo, resolve, reject));
+    });
+  },
+
+  /**
+   * Gets the git logs from the given repo.
+   * @param {object} repo - a git repo.
+   * @return {Promise} a promise to return an array of git logs.
+   */
+  getLog(repo) {
+    console.log('Getting log...');
+    return new Promise((resolve, reject) => {
+      repo.log()
+        .then(logs => {
+          resolve(logs);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   },
 

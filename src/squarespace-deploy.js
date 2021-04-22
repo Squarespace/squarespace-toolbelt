@@ -37,6 +37,7 @@ const colors = require('colors');
 const Program = require('commander');
 const Moment = require('moment');
 const URL = require('url-parse');
+const { exec } = require('child_process');
 
 const Deployment = require('./utils/deployment');
 const Watcher = require('./utils/watch');
@@ -59,15 +60,34 @@ function main(options) {
   const message = options.message || 'squarespace deploy ' + Moment().format('lll');
   const normalizedUrl = repoUrl.replace(/([^:])(\/\/+)/, '$1/')
     .replace(/^http:/, 'https:');
+  const executeAfterCommand = () => {
+    if (options.after) {
+      exec(options.after, (err, stdout, stderr) => {
+        if (err) {
+          console.error(colors.red.bold('Error executing after deploy command:\n\n', err.toString()));
+          process.exit(err.code);
+        } else {
+          if (stdout) {
+            console.log(stdout);
+          }
+          if (stderr) {
+            console.error(colors.red.bold(stderr));
+          }
+        }
+      });
+    }
+  };
 
   if (options.force) flags.force = true;
 
   Deployment.deploy(directory, normalizedUrl, message, true, flags)
+    .then(executeAfterCommand)
     .catch(() => process.exit(1));
 
   if (options.watch) {
     Watcher.watchFolder(directory, WATCH_EXCL_PATTERNS, () => {
-      Deployment.deploy(directory, repoUrl, message, false, flags);
+      Deployment.deploy(directory, repoUrl, message, false, flags)
+        .then(executeAfterCommand);
     });
   }
 }
@@ -86,6 +106,7 @@ Program
   .option('-w, --watch',
     'Watch the build directory for changes and deploy automatically.')
   .option('--postBufferSize <size>', 'Set custom git http.postBuffer size. Default is 157286400')
+  .option('-a, --after <command>', 'Run a command after the deploy has completed.')
   .parse(process.argv);
 
 if (!repoUrl) {
