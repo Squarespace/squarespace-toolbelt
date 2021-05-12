@@ -39,7 +39,7 @@
     "request-promise": "^4.1.1",
     "split-lines": "^1.0.0",
     "tough-cookie": "^2.3.2",
-    "url-parse": "^1.0.5",
+    "url-parse": "^1.5.1",
     "validator": "^6.2.0"
   },
   "devDependencies": {
