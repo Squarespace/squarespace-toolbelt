@@ -106,6 +106,7 @@ Options:
     -m, --message <message>      Deployment message. Default is 'sqs-deploy <date time>'
     -w, --watch                  Watch the build directory for changes and deploy automatically.
     -f, --force                  Force deployment of build. This will overwrite any git history in your site's /template.git repository.
+    -a, --after <command>        Run a command after the build has completed.
 
 #### Troubleshooting
 
