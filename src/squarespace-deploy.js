@@ -62,7 +62,14 @@ function main(options) {
     .replace(/^http:/, 'https:');
   const executeAfterCommand = () => {
     if (options.after) {
-      exec(options.after, (err, stdout, stderr) => {
+      const env = {
+        ...process.env,
+        // Add in some helpful environment variables for use by the afterCommand
+        GIT_REPO_ADDRESS: normalizedUrl,
+        GIT_REPO_DIR: directory
+      };
+
+      exec(options.after, { env }, (err, stdout, stderr) => {
         if (err) {
           console.error(colors.red.bold('Error executing after deploy command:\n\n', err.toString()));
           process.exit(err.code);
