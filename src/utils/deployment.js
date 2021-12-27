@@ -232,7 +232,14 @@ const Deployment = {
     console.log('Pushing build...');
     const remote = gitUrlToOriginName(repoUrl);
     return new Promise((resolve, reject) => {
-      repo.push([remote, 'master'], flags, finishWithGitResult(repo, resolve, reject));
+      repo.push([remote, 'master'], flags, (err, stdOut, stdErr) => {
+        console.log(stdErr);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(repo);
+        }
+      });
     });
   },
 
@@ -386,7 +393,7 @@ const Deployment = {
     if (!repo) {
       throw new Error('No repo!');
     }
-    console.log('Success!');
+    console.log('Template pushed!');
   }
 
 };
