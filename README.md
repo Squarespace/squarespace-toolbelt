@@ -1,3 +1,5 @@
+# This repository is scheduled to be deprecated. After October 31, 2024, the contents of this repo will no longer be available on GitHub. See [developers.squarespace.com/tools](https://developers.squarespace.com/tools) for more details
+
 Squarespace Toolbelt
 --------------------
 
